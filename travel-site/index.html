@@ -130,12 +130,19 @@
           <input id="link" type="url" class="w-full border rounded-lg px-3 py-2" placeholder="https://booking.com/referral=nico" required />
         </div>
         <div class="md:col-span-2">
-          <label class="text-sm font-semibold">Descripción</label>
-          <textarea id="descripcion" class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="Incluye vuelos, hotel, traslados, etc."></textarea>
+          <label class="text-sm font-semibold">Descripción (acepta HTML)</label>
+          <textarea id="descripcion" class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="<strong>Incluye</strong> vuelos, hotel, traslados, etc."></textarea>
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm font-semibold">Fotos de la oferta (múltiples)</label>
+          <input id="fotos" type="file" multiple accept="image/*" class="w-full border rounded-lg px-3 py-2 bg-white" />
+          <p class="text-xs text-slate-500 mt-1">Si editás una oferta y subís más fotos, se agregan a las ya existentes.</p>
+          <div id="fotosPreview" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3"></div>
         </div>
         <div class="md:col-span-2 flex flex-wrap gap-3">
           <button class="bg-brand-blue text-white font-bold px-5 py-2 rounded-lg" type="submit">Guardar</button>
           <button id="cancelEdit" class="bg-slate-200 text-slate-800 font-bold px-5 py-2 rounded-lg" type="button">Cancelar edición</button>
+          <button id="clearFormImages" class="bg-amber-100 text-amber-800 font-bold px-5 py-2 rounded-lg" type="button">Limpiar fotos del formulario</button>
           <button id="clearAll" class="bg-red-100 text-red-700 font-bold px-5 py-2 rounded-lg" type="button">Eliminar todo</button>
         </div>
       </form>
@@ -165,10 +172,10 @@
     <div class="bg-white rounded-2xl shadow p-6">
       <h3 class="text-xl font-bold mb-4">Listado (ABM)</h3>
       <div class="overflow-auto">
-        <table class="w-full text-left min-w-[900px]">
+        <table class="w-full text-left min-w-[980px]">
           <thead>
             <tr class="border-b">
-              <th class="py-2">Tipo</th><th class="py-2">Nombre</th><th class="py-2">Fechas</th><th class="py-2">Precio</th><th class="py-2">Referido</th><th class="py-2">Acciones</th>
+              <th class="py-2">Tipo</th><th class="py-2">Nombre</th><th class="py-2">Fechas</th><th class="py-2">Precio</th><th class="py-2">Fotos</th><th class="py-2">Referido</th><th class="py-2">Acciones</th>
             </tr>
           </thead>
           <tbody id="adminRows"></tbody>
@@ -180,6 +187,7 @@
 
   <script>
     const STORAGE_KEY = 'viajes_horizonte_items';
+    const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?auto=format&fit=crop&w=900&q=80';
 
     const tabUsuarioBtn = document.getElementById('tabUsuarioBtn');
     const tabAdminBtn = document.getElementById('tabAdminBtn');
@@ -195,6 +203,8 @@
     const precio = document.getElementById('precio');
     const link = document.getElementById('link');
     const descripcion = document.getElementById('descripcion');
+    const fotos = document.getElementById('fotos');
+    const fotosPreview = document.getElementById('fotosPreview');
 
     const adminRows = document.getElementById('adminRows');
     const adminEmpty = document.getElementById('adminEmpty');
@@ -216,6 +226,8 @@
     const gfStatus = document.getElementById('gfStatus');
     const gfResults = document.getElementById('gfResults');
 
+    let editExistingImages = [];
+
     function getItems() {
       return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     }
@@ -233,15 +245,47 @@
       tabAdminBtn.classList.toggle('text-slate-900', isAdmin);
     }
 
-    function clearForm() {
-      form.reset();
-      itemId.value = '';
-    }
-
     function formatDates(fi, ff) {
       if (!fi && !ff) return 'Fecha a confirmar';
       if (fi && ff) return `${fi} → ${ff}`;
       return fi || ff;
+    }
+
+    function safeImages(images) {
+      return Array.isArray(images) && images.length ? images : [PLACEHOLDER_IMAGE];
+    }
+
+    function renderImagePreview(urls) {
+      fotosPreview.innerHTML = '';
+      if (!urls.length) return;
+      urls.forEach((src) => {
+        const box = document.createElement('div');
+        box.className = 'h-24 rounded-lg overflow-hidden border';
+        box.innerHTML = `<img src="${src}" alt="preview" class="w-full h-full object-cover" />`;
+        fotosPreview.appendChild(box);
+      });
+    }
+
+    function clearForm() {
+      form.reset();
+      itemId.value = '';
+      editExistingImages = [];
+      renderImagePreview([]);
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function readSelectedPhotos() {
+      const files = Array.from(fotos.files || []);
+      if (!files.length) return [];
+      return Promise.all(files.map(fileToDataUrl));
     }
 
     function addItem(payload) {
@@ -269,6 +313,8 @@
       precio.value = item.precio;
       link.value = item.link;
       descripcion.value = item.descripcion || '';
+      editExistingImages = Array.isArray(item.images) ? item.images : [];
+      renderImagePreview(editExistingImages);
       switchTab(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -279,12 +325,26 @@
     }
 
     function buildOfferCard(item) {
+      const images = safeImages(item.images);
+      const showControls = images.length > 1;
+      const descriptionHtml = item.descripcion || '<em>Sin descripción adicional.</em>';
+
       return `
-        <article class="min-w-[280px] max-w-[320px] bg-white p-5 rounded-xl shadow hover:shadow-lg transition snap-start border border-slate-100">
+        <article class="min-w-[290px] max-w-[340px] bg-white p-5 rounded-xl shadow hover:shadow-lg transition snap-start border border-slate-100">
           <p class="text-xs font-bold uppercase tracking-wide text-brand-orange mb-2">${item.tipo}</p>
+
+          <div class="relative mb-3 rounded-lg overflow-hidden border">
+            <img id="photo-img-${item.id}" data-photo-index="0" src="${images[0]}" alt="${item.nombre}" class="w-full h-44 object-cover" />
+            ${showControls ? `
+              <button data-photo-prev="${item.id}" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/55 text-white px-2 py-1 rounded"><i class="fas fa-chevron-left"></i></button>
+              <button data-photo-next="${item.id}" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/55 text-white px-2 py-1 rounded"><i class="fas fa-chevron-right"></i></button>
+              <span id="photo-counter-${item.id}" class="absolute bottom-2 right-2 text-xs bg-black/65 text-white px-2 py-1 rounded">1 / ${images.length}</span>
+            ` : ''}
+          </div>
+
           <h4 class="font-bold text-lg text-slate-800">${item.nombre}</h4>
           <p class="text-sm text-slate-500 mb-2">${formatDates(item.fechaInicio, item.fechaFin)}</p>
-          <p class="text-sm text-slate-600 mb-4">${item.descripcion || 'Sin descripción adicional.'}</p>
+          <div class="text-sm text-slate-600 mb-4">${descriptionHtml}</div>
           <div class="flex items-center justify-between gap-2">
             <span class="text-xl font-extrabold text-brand-blue">${item.precio}</span>
             <button data-open-link="${item.link}" class="bg-brand-blue hover:bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded-lg">Abrir link</button>
@@ -302,6 +362,41 @@
           <button data-open-link="${fallbackLink}" class="bg-brand-orange hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-lg">Probar apertura de link</button>
         </article>
       `;
+    }
+
+    function onPhotoChange(itemId, direction) {
+      const all = getItems();
+      const item = all.find(i => i.id === itemId);
+      if (!item) return;
+      const images = safeImages(item.images);
+      if (images.length <= 1) return;
+
+      const imgNode = document.getElementById(`photo-img-${itemId}`);
+      const counter = document.getElementById(`photo-counter-${itemId}`);
+      if (!imgNode) return;
+
+      const current = Number(imgNode.dataset.photoIndex || 0);
+      const next = (current + direction + images.length) % images.length;
+      imgNode.dataset.photoIndex = String(next);
+      imgNode.src = images[next];
+      if (counter) counter.textContent = `${next + 1} / ${images.length}`;
+    }
+
+    function bindUserCardEvents() {
+      document.querySelectorAll('[data-open-link]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const href = btn.getAttribute('data-open-link');
+          if (!href) return;
+          window.open(href, '_blank', 'noopener,noreferrer');
+        });
+      });
+
+      document.querySelectorAll('[data-photo-prev]').forEach(btn => {
+        btn.addEventListener('click', () => onPhotoChange(btn.getAttribute('data-photo-prev'), -1));
+      });
+      document.querySelectorAll('[data-photo-next]').forEach(btn => {
+        btn.addEventListener('click', () => onPhotoChange(btn.getAttribute('data-photo-next'), 1));
+      });
     }
 
     function renderUserCarousels() {
@@ -327,13 +422,7 @@
         node.innerHTML = content;
       });
 
-      document.querySelectorAll('[data-open-link]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const href = btn.getAttribute('data-open-link');
-          if (!href) return;
-          window.open(href, '_blank', 'noopener,noreferrer');
-        });
-      });
+      bindUserCardEvents();
     }
 
     function renderAdmin() {
@@ -342,6 +431,7 @@
       adminEmpty.style.display = items.length ? 'none' : 'block';
 
       items.forEach(item => {
+        const imgCount = Array.isArray(item.images) ? item.images.length : 0;
         const tr = document.createElement('tr');
         tr.className = 'border-b';
         tr.innerHTML = `
@@ -349,6 +439,7 @@
           <td class="py-2 pr-3 font-semibold">${item.nombre}</td>
           <td class="py-2 pr-3">${formatDates(item.fechaInicio, item.fechaFin)}</td>
           <td class="py-2 pr-3">${item.precio}</td>
+          <td class="py-2 pr-3">${imgCount}</td>
           <td class="py-2 pr-3"><a class="text-blue-700 underline" href="${item.link}" target="_blank" rel="noopener">Ver link</a></td>
           <td class="py-2 pr-3">
             <div class="flex gap-2">
@@ -416,7 +507,8 @@
             fechaFin: gfReturnDate.value,
             precio: r.price || 'Consultar',
             link: r.link || getGoogleFlightsLink(),
-            descripcion: `Importado desde búsqueda de vuelos (${r.route || 'ruta'})`
+            descripcion: `Importado desde búsqueda de vuelos (${r.route || 'ruta'})`,
+            images: []
           });
           switchTab(true);
           gfStatus.textContent = 'Vuelo agregado al ABM correctamente.';
@@ -499,8 +591,15 @@
       renderUserCarousels();
     }
 
-    form.addEventListener('submit', (e) => {
+    fotos.addEventListener('change', async () => {
+      const selected = await readSelectedPhotos();
+      renderImagePreview([...editExistingImages, ...selected]);
+    });
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const newImages = await readSelectedPhotos();
+
       addItem({
         id: itemId.value || undefined,
         tipo: tipo.value,
@@ -509,13 +608,21 @@
         fechaFin: fechaFin.value,
         precio: precio.value.trim(),
         link: link.value.trim(),
-        descripcion: descripcion.value.trim()
+        descripcion: descripcion.value.trim(),
+        images: [...editExistingImages, ...newImages]
       });
+
       clearForm();
       alert('Registro guardado en LocalStorage');
     });
 
     document.getElementById('cancelEdit').addEventListener('click', clearForm);
+    document.getElementById('clearFormImages').addEventListener('click', () => {
+      editExistingImages = [];
+      fotos.value = '';
+      renderImagePreview([]);
+    });
+
     document.getElementById('clearAll').addEventListener('click', () => {
       if (!confirm('¿Eliminar todos los registros?')) return;
       setItems([]);
@@ -549,7 +656,11 @@
           fechaFin: '2026-05-20',
           precio: 'USD 1.890',
           link: 'https://www.cruisedirect.com/?ref=nico',
-          descripcion: 'Incluye pensión completa y 2 excursiones.'
+          descripcion: '<strong>Incluye</strong> pensión completa y 2 excursiones.',
+          images: [
+            'https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1000&q=80'
+          ]
         },
         {
           id: 'demo-2',
@@ -559,7 +670,12 @@
           fechaFin: '2026-06-07',
           precio: 'USD 790',
           link: 'https://www.booking.com/referral=nico',
-          descripcion: 'Desayuno incluido y cancelación flexible.'
+          descripcion: '<ul><li>Desayuno incluido</li><li>Cancelación flexible</li></ul>',
+          images: [
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=1000&q=80'
+          ]
         },
         {
           id: 'demo-3',
@@ -569,7 +685,10 @@
           fechaFin: '2026-06-20',
           precio: 'USD 1.120',
           link: 'https://www.google.com/travel/flights',
-          descripcion: 'Ida y vuelta con equipaje en bodega.'
+          descripcion: 'Ida y vuelta con equipaje en bodega.',
+          images: [
+            'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1000&q=80'
+          ]
         },
         {
           id: 'demo-4',
@@ -579,7 +698,10 @@
           fechaFin: '',
           precio: 'USD 45',
           link: 'https://www.rome2rio.com/?ref=nico',
-          descripcion: 'Servicio adicional privado por tramo.'
+          descripcion: 'Servicio adicional privado por tramo.',
+          images: [
+            'https://images.unsplash.com/photo-1556122071-e404eaedb77f?auto=format&fit=crop&w=1000&q=80'
+          ]
         }
       ]);
     }
