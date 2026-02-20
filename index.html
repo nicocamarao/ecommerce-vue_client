@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viajes Horizonte | Usuario + Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    html { scroll-behavior: smooth; }
+    .bg-brand-blue { background-color: #0d3b66; }
+    .bg-brand-orange { background-color: #f95738; }
+    .text-brand-orange { color: #f95738; }
+    .hidden-tab { display: none; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <nav class="bg-brand-blue text-white sticky top-0 z-50 shadow-md">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-earth-americas text-2xl"></i>
+        <span class="text-xl font-bold tracking-tight">VIAJES <span class="text-orange-300">HORIZONTE</span></span>
+      </div>
+
+      <div class="flex items-center gap-2 bg-white/10 rounded-full p-1">
+        <button id="tabUsuarioBtn" class="tab-btn px-4 py-2 rounded-full text-sm md:text-base font-semibold bg-white text-slate-900">Usuario</button>
+        <button id="tabAdminBtn" class="tab-btn px-4 py-2 rounded-full text-sm md:text-base font-semibold text-white">Admin</button>
+      </div>
+    </div>
+  </nav>
+
+  <section id="tabUsuario">
+    <header class="relative h-[440px] flex items-center justify-center text-white overflow-hidden">
+      <img src="https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=1920&q=80" alt="Viajeros" class="absolute inset-0 w-full h-full object-cover brightness-50" />
+      <div class="relative z-10 text-center px-4">
+        <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Explorá el mundo con ofertas reales</h1>
+        <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto font-light">Paquetes, hoteles, pasajes, cruceros y transporte en un solo lugar, con links de terceros y referidos.</p>
+        <a href="#destacados" class="bg-brand-orange hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg inline-block">Ver oportunidades de hoy</a>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+      <section id="destacados" class="mb-16">
+        <div class="flex items-center space-x-3 mb-8">
+          <div class="h-8 w-2 bg-brand-orange"></div>
+          <h2 class="text-3xl font-bold text-slate-900">OFERTA DESTACADA</h2>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 flex flex-col md:flex-row">
+          <div class="md:w-1/2 bg-white flex items-center justify-center p-8">
+            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80" alt="Caribe" class="rounded-2xl max-h-80 object-cover w-full">
+          </div>
+          <div class="md:w-1/2 p-8 md:p-12 flex flex-col justify-center bg-slate-50">
+            <span class="inline-block bg-orange-100 text-brand-orange font-bold px-3 py-1 rounded-full text-sm mb-4"><i class="fas fa-fire mr-2"></i>PRECIO DESTACADO</span>
+            <h3 class="text-4xl font-extrabold text-slate-900 mb-2">Caribe All Inclusive</h3>
+            <p class="text-slate-600 text-lg mb-6 leading-relaxed">7 noches con vuelo + hotel + traslados.</p>
+            <div class="flex items-end space-x-4 mb-8">
+              <div class="flex flex-col">
+                <span class="text-slate-400 line-through text-lg leading-none">USD 1.499</span>
+                <span class="text-5xl font-black text-brand-blue">USD 1.099</span>
+              </div>
+              <span class="text-2xl text-slate-500 font-medium mb-1">/ por persona</span>
+            </div>
+            <a href="https://www.booking.com" target="_blank" rel="noopener noreferrer" class="bg-brand-blue hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-lg transition shadow-md text-center"><i class="fas fa-arrow-up-right-from-square mr-2"></i>Ir a proveedor</a>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-bold text-slate-900">Recomendados cargados por Admin</h2>
+        </div>
+        <div id="userCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <p id="userEmpty" class="text-slate-500">Aún no hay productos cargados en Admin.</p>
+      </section>
+    </main>
+  </section>
+
+  <section id="tabAdmin" class="hidden-tab container mx-auto px-4 py-10">
+    <div class="flex items-center space-x-3 mb-8">
+      <div class="h-8 w-2 bg-brand-orange"></div>
+      <h2 class="text-3xl font-bold text-slate-900">ADMIN · ABM de Viajes</h2>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-6 mb-8">
+      <h3 class="text-xl font-bold mb-4">Alta / Edición</h3>
+      <form id="travelForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="hidden" id="itemId" />
+        <div>
+          <label class="text-sm font-semibold">Tipo</label>
+          <select id="tipo" class="w-full border rounded-lg px-3 py-2" required>
+            <option value="">Seleccionar...</option>
+            <option>Paquete</option>
+            <option>Hotel</option>
+            <option>Pasaje</option>
+            <option>Crucero</option>
+            <option>Transporte</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-semibold">Nombre</label>
+          <input id="nombre" class="w-full border rounded-lg px-3 py-2" placeholder="Ej: Punta Cana 7 noches" required />
+        </div>
+        <div>
+          <label class="text-sm font-semibold">Fecha inicio</label>
+          <input id="fechaInicio" type="date" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold">Fecha fin</label>
+          <input id="fechaFin" type="date" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="text-sm font-semibold">Precio</label>
+          <input id="precio" class="w-full border rounded-lg px-3 py-2" placeholder="USD 1.099" required />
+        </div>
+        <div>
+          <label class="text-sm font-semibold">Link referido</label>
+          <input id="link" type="url" class="w-full border rounded-lg px-3 py-2" placeholder="https://..." required />
+        </div>
+        <div class="md:col-span-2">
+          <label class="text-sm font-semibold">Descripción</label>
+          <textarea id="descripcion" class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="Incluye vuelos, hotel, traslados, etc."></textarea>
+        </div>
+        <div class="md:col-span-2 flex flex-wrap gap-3">
+          <button class="bg-brand-blue text-white font-bold px-5 py-2 rounded-lg" type="submit">Guardar</button>
+          <button id="cancelEdit" class="bg-slate-200 text-slate-800 font-bold px-5 py-2 rounded-lg" type="button">Cancelar edición</button>
+          <button id="clearAll" class="bg-red-100 text-red-700 font-bold px-5 py-2 rounded-lg" type="button">Eliminar todo</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h3 class="text-xl font-bold mb-4">Listado (ABM)</h3>
+      <div class="overflow-auto">
+        <table class="w-full text-left min-w-[900px]">
+          <thead>
+            <tr class="border-b">
+              <th class="py-2">Tipo</th><th class="py-2">Nombre</th><th class="py-2">Fechas</th><th class="py-2">Precio</th><th class="py-2">Referido</th><th class="py-2">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="adminRows"></tbody>
+        </table>
+      </div>
+      <p id="adminEmpty" class="text-slate-500 mt-4">Sin registros aún.</p>
+    </div>
+  </section>
+
+  <script>
+    const STORAGE_KEY = 'viajes_horizonte_items';
+
+    const tabUsuarioBtn = document.getElementById('tabUsuarioBtn');
+    const tabAdminBtn = document.getElementById('tabAdminBtn');
+    const tabUsuario = document.getElementById('tabUsuario');
+    const tabAdmin = document.getElementById('tabAdmin');
+
+    const form = document.getElementById('travelForm');
+    const itemId = document.getElementById('itemId');
+    const tipo = document.getElementById('tipo');
+    const nombre = document.getElementById('nombre');
+    const fechaInicio = document.getElementById('fechaInicio');
+    const fechaFin = document.getElementById('fechaFin');
+    const precio = document.getElementById('precio');
+    const link = document.getElementById('link');
+    const descripcion = document.getElementById('descripcion');
+
+    const adminRows = document.getElementById('adminRows');
+    const adminEmpty = document.getElementById('adminEmpty');
+    const userCards = document.getElementById('userCards');
+    const userEmpty = document.getElementById('userEmpty');
+
+    function getItems() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }
+
+    function setItems(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function switchTab(isAdmin) {
+      tabUsuario.classList.toggle('hidden-tab', isAdmin);
+      tabAdmin.classList.toggle('hidden-tab', !isAdmin);
+      tabUsuarioBtn.classList.toggle('bg-white', !isAdmin);
+      tabUsuarioBtn.classList.toggle('text-slate-900', !isAdmin);
+      tabAdminBtn.classList.toggle('bg-white', isAdmin);
+      tabAdminBtn.classList.toggle('text-slate-900', isAdmin);
+    }
+
+    function clearForm() {
+      form.reset();
+      itemId.value = '';
+    }
+
+    function editItem(id) {
+      const items = getItems();
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+      itemId.value = item.id;
+      tipo.value = item.tipo;
+      nombre.value = item.nombre;
+      fechaInicio.value = item.fechaInicio || '';
+      fechaFin.value = item.fechaFin || '';
+      precio.value = item.precio;
+      link.value = item.link;
+      descripcion.value = item.descripcion || '';
+      switchTab(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteItem(id) {
+      const items = getItems().filter(i => i.id !== id);
+      setItems(items);
+      renderAll();
+    }
+
+    function formatDates(fi, ff) {
+      if (!fi && !ff) return '-';
+      if (fi && ff) return `${fi} → ${ff}`;
+      return fi || ff;
+    }
+
+    function renderAdmin() {
+      const items = getItems();
+      adminRows.innerHTML = '';
+      adminEmpty.style.display = items.length ? 'none' : 'block';
+
+      items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b';
+        tr.innerHTML = `
+          <td class="py-2 pr-3">${item.tipo}</td>
+          <td class="py-2 pr-3 font-semibold">${item.nombre}</td>
+          <td class="py-2 pr-3">${formatDates(item.fechaInicio, item.fechaFin)}</td>
+          <td class="py-2 pr-3">${item.precio}</td>
+          <td class="py-2 pr-3"><a class="text-blue-700 underline" href="${item.link}" target="_blank" rel="noopener">Ver link</a></td>
+          <td class="py-2 pr-3">
+            <div class="flex gap-2">
+              <button data-edit="${item.id}" class="px-3 py-1 bg-amber-100 text-amber-700 rounded">Editar</button>
+              <button data-del="${item.id}" class="px-3 py-1 bg-red-100 text-red-700 rounded">Eliminar</button>
+            </div>
+          </td>
+        `;
+        adminRows.appendChild(tr);
+      });
+
+      adminRows.querySelectorAll('[data-edit]').forEach(btn => {
+        btn.addEventListener('click', () => editItem(btn.getAttribute('data-edit')));
+      });
+      adminRows.querySelectorAll('[data-del]').forEach(btn => {
+        btn.addEventListener('click', () => deleteItem(btn.getAttribute('data-del')));
+      });
+    }
+
+    function renderUser() {
+      const items = getItems();
+      userCards.innerHTML = '';
+      userEmpty.style.display = items.length ? 'none' : 'block';
+
+      items.forEach(item => {
+        const card = document.createElement('article');
+        card.className = 'bg-white p-5 rounded-xl shadow hover:shadow-lg transition';
+        card.innerHTML = `
+          <p class="text-xs font-bold uppercase tracking-wide text-brand-orange mb-2">${item.tipo}</p>
+          <h4 class="font-bold text-lg text-slate-800">${item.nombre}</h4>
+          <p class="text-sm text-slate-500 mb-2">${formatDates(item.fechaInicio, item.fechaFin)}</p>
+          <p class="text-sm text-slate-600 mb-4">${item.descripcion || 'Sin descripción adicional.'}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xl font-extrabold text-brand-blue">${item.precio}</span>
+            <a href="${item.link}" target="_blank" rel="noopener" class="bg-brand-blue hover:bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded-lg">Reservar</a>
+          </div>
+        `;
+        userCards.appendChild(card);
+      });
+    }
+
+    function renderAll() {
+      renderAdmin();
+      renderUser();
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const items = getItems();
+      const payload = {
+        id: itemId.value || `${Date.now()}`,
+        tipo: tipo.value,
+        nombre: nombre.value.trim(),
+        fechaInicio: fechaInicio.value,
+        fechaFin: fechaFin.value,
+        precio: precio.value.trim(),
+        link: link.value.trim(),
+        descripcion: descripcion.value.trim()
+      };
+
+      if (itemId.value) {
+        const idx = items.findIndex(i => i.id === itemId.value);
+        if (idx !== -1) items[idx] = payload;
+      } else {
+        items.unshift(payload);
+      }
+
+      setItems(items);
+      clearForm();
+      renderAll();
+      alert('Registro guardado en LocalStorage');
+    });
+
+    document.getElementById('cancelEdit').addEventListener('click', clearForm);
+    document.getElementById('clearAll').addEventListener('click', () => {
+      if (!confirm('¿Eliminar todos los registros?')) return;
+      setItems([]);
+      clearForm();
+      renderAll();
+    });
+
+    tabUsuarioBtn.addEventListener('click', () => switchTab(false));
+    tabAdminBtn.addEventListener('click', () => switchTab(true));
+
+    // Seed inicial rápido si está vacío
+    if (!getItems().length) {
+      setItems([
+        {
+          id: 'demo-1',
+          tipo: 'Crucero',
+          nombre: 'Crucero Mediterráneo 10 noches',
+          fechaInicio: '2026-05-10',
+          fechaFin: '2026-05-20',
+          precio: 'USD 1.890',
+          link: 'https://www.cruisedirect.com/',
+          descripcion: 'Incluye pensión completa y 2 excursiones.'
+        }
+      ]);
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
