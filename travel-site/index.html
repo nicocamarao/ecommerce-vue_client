@@ -3,710 +3,335 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Viajes Horizonte | Usuario + Admin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    html { scroll-behavior: smooth; }
-    .bg-brand-blue { background-color: #0d3b66; }
-    .bg-brand-orange { background-color: #f95738; }
-    .text-brand-orange { color: #f95738; }
-    .hidden-tab { display: none; }
-  </style>
+  <title>Travel Site | Promos, mapa y admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
-<body class="bg-slate-50 text-slate-800">
-  <nav class="bg-brand-blue text-white sticky top-0 z-50 shadow-md">
-    <div class="container mx-auto px-4 py-3 flex justify-between items-center gap-4">
-      <div class="flex items-center space-x-2">
-        <i class="fas fa-earth-americas text-2xl"></i>
-        <span class="text-xl font-bold tracking-tight">VIAJES <span class="text-orange-300">HORIZONTE</span></span>
-      </div>
+<body>
+  <header class="site-header">
+    <div class="container header-shell">
+      <a class="brand" href="#inicio">
+        <div class="brand__mark" aria-hidden="true"></div>
+        <div>
+          <strong>Travel Site</strong>
+          <span data-i18n="brand_tagline">Promos, vuelos y destinos en una sola app</span>
+        </div>
+      </a>
 
-      <div class="flex items-center gap-2 bg-white/10 rounded-full p-1">
-        <button id="tabUsuarioBtn" class="tab-btn px-4 py-2 rounded-full text-sm md:text-base font-semibold bg-white text-slate-900">Usuario</button>
-        <button id="tabAdminBtn" class="tab-btn px-4 py-2 rounded-full text-sm md:text-base font-semibold text-white">Admin</button>
+      <nav class="top-nav">
+        <a href="#buscador" data-i18n="nav_search">Buscador</a>
+        <a href="#promos" data-i18n="nav_packages">Promos</a>
+        <a href="#mapa" data-i18n="nav_map">Mapa</a>
+        <a href="#paises" data-i18n="nav_countries">Paises</a>
+        <a href="#lugares" data-i18n="editorial_exotic_title">Lugares exóticos</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="button button--secondary button--tiny" href="./admin.html">LOGIN STAFF</a>
+        <select id="languageSelect" class="select-inline" aria-label="Idioma">
+          <option value="es">ES</option>
+          <option value="en">EN</option>
+          <option value="pt">PT</option>
+        </select>
+
+        <div class="theme-picker" aria-label="Tema de color">
+          <button type="button" class="theme-swatch is-active" data-theme="ocean" title="Ocean"></button>
+          <button type="button" class="theme-swatch theme-swatch--sunset" data-theme="sunset" title="Sunset"></button>
+          <button type="button" class="theme-swatch theme-swatch--forest" data-theme="forest" title="Forest"></button>
+        </div>
       </div>
     </div>
-  </nav>
+  </header>
 
-  <section id="tabUsuario">
-    <header class="relative h-[440px] flex items-center justify-center text-white overflow-hidden">
-      <img src="https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=1920&q=80" alt="Viajeros" class="absolute inset-0 w-full h-full object-cover brightness-50" />
-      <div class="relative z-10 text-center px-4">
-        <h1 class="text-4xl md:text-6xl font-extrabold mb-4">Explorá el mundo con ofertas reales</h1>
-        <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto font-light">Paquetes, hoteles, pasajes y traslados en un solo lugar. Todas las ofertas vienen del ABM y se guardan en tu navegador.</p>
-        <a href="#seccionPaquetes" class="bg-brand-orange hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg inline-block">Ver carruseles</a>
-      </div>
-    </header>
-
-    <main class="container mx-auto px-4 py-12 space-y-12">
-      <section id="seccionPaquetes">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Paquetes (Paquete + Crucero)</h2>
-          <div class="flex gap-2">
-            <button data-carousel-prev="paquetes" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
-            <button data-carousel-next="paquetes" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-right"></i></button>
-          </div>
-        </div>
-        <div id="carousel-paquetes" class="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"></div>
-      </section>
-
-      <section id="seccionHoteles">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Solo Hotel</h2>
-          <div class="flex gap-2">
-            <button data-carousel-prev="hoteles" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
-            <button data-carousel-next="hoteles" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-right"></i></button>
-          </div>
-        </div>
-        <div id="carousel-hoteles" class="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"></div>
-      </section>
-
-      <section id="seccionPasajes">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Solo Pasaje</h2>
-          <div class="flex gap-2">
-            <button data-carousel-prev="pasajes" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
-            <button data-carousel-next="pasajes" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-right"></i></button>
-          </div>
-        </div>
-        <div id="carousel-pasajes" class="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"></div>
-      </section>
-
-      <section id="seccionExtras">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">Traslados y Transporte (servicio adicional)</h2>
-          <div class="flex gap-2">
-            <button data-carousel-prev="transportes" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-left"></i></button>
-            <button data-carousel-next="transportes" class="bg-white border px-3 py-2 rounded-lg"><i class="fas fa-chevron-right"></i></button>
-          </div>
-        </div>
-        <div id="carousel-transportes" class="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory"></div>
-      </section>
-    </main>
-  </section>
-
-  <section id="tabAdmin" class="hidden-tab container mx-auto px-4 py-10 space-y-8">
-    <div class="flex items-center space-x-3">
-      <div class="h-8 w-2 bg-brand-orange"></div>
-      <h2 class="text-3xl font-bold text-slate-900">ADMIN · ABM de Viajes</h2>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow p-6">
-      <h3 class="text-xl font-bold mb-4">Alta / Edición Manual</h3>
-      <form id="travelForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input type="hidden" id="itemId" />
-        <div>
-          <label class="text-sm font-semibold">Tipo</label>
-          <select id="tipo" class="w-full border rounded-lg px-3 py-2" required>
-            <option value="">Seleccionar...</option>
-            <option>Paquete</option>
-            <option>Hotel</option>
-            <option>Pasaje</option>
-            <option>Crucero</option>
-            <option>Transporte</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-sm font-semibold">Nombre</label>
-          <input id="nombre" class="w-full border rounded-lg px-3 py-2" placeholder="Ej: Punta Cana 7 noches" required />
-        </div>
-        <div>
-          <label class="text-sm font-semibold">Fecha inicio</label>
-          <input id="fechaInicio" type="date" class="w-full border rounded-lg px-3 py-2" />
-        </div>
-        <div>
-          <label class="text-sm font-semibold">Fecha fin</label>
-          <input id="fechaFin" type="date" class="w-full border rounded-lg px-3 py-2" />
-        </div>
-        <div>
-          <label class="text-sm font-semibold">Precio</label>
-          <input id="precio" class="w-full border rounded-lg px-3 py-2" placeholder="USD 1.099" required />
-        </div>
-        <div>
-          <label class="text-sm font-semibold">Link referido</label>
-          <input id="link" type="url" class="w-full border rounded-lg px-3 py-2" placeholder="https://booking.com/referral=nico" required />
-        </div>
-        <div class="md:col-span-2">
-          <label class="text-sm font-semibold">Descripción (acepta HTML)</label>
-          <textarea id="descripcion" class="w-full border rounded-lg px-3 py-2" rows="3" placeholder="<strong>Incluye</strong> vuelos, hotel, traslados, etc."></textarea>
-        </div>
-        <div class="md:col-span-2">
-          <label class="text-sm font-semibold">Fotos de la oferta (múltiples)</label>
-          <input id="fotos" type="file" multiple accept="image/*" class="w-full border rounded-lg px-3 py-2 bg-white" />
-          <p class="text-xs text-slate-500 mt-1">Si editás una oferta y subís más fotos, se agregan a las ya existentes.</p>
-          <div id="fotosPreview" class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3"></div>
-        </div>
-        <div class="md:col-span-2 flex flex-wrap gap-3">
-          <button class="bg-brand-blue text-white font-bold px-5 py-2 rounded-lg" type="submit">Guardar</button>
-          <button id="cancelEdit" class="bg-slate-200 text-slate-800 font-bold px-5 py-2 rounded-lg" type="button">Cancelar edición</button>
-          <button id="clearFormImages" class="bg-amber-100 text-amber-800 font-bold px-5 py-2 rounded-lg" type="button">Limpiar fotos del formulario</button>
-          <button id="clearAll" class="bg-red-100 text-red-700 font-bold px-5 py-2 rounded-lg" type="button">Eliminar todo</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow p-6">
-      <h3 class="text-xl font-bold mb-2">Integración Vuelos (Google Flights)</h3>
-      <p class="text-sm text-slate-600 mb-3">
-        Google Flights no ofrece API pública oficial abierta para scraping directo desde navegador.
-        Para integración real, usá un proveedor tipo <strong>SerpAPI (Google Flights engine)</strong> o backend propio.
-      </p>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-        <input id="gfApiKey" class="border rounded-lg px-3 py-2" placeholder="SerpAPI key (opcional)" />
-        <input id="gfFrom" class="border rounded-lg px-3 py-2" placeholder="Origen IATA ej: MVD" />
-        <input id="gfTo" class="border rounded-lg px-3 py-2" placeholder="Destino IATA ej: MAD" />
-        <input id="gfOutDate" type="date" class="border rounded-lg px-3 py-2" />
-        <input id="gfReturnDate" type="date" class="border rounded-lg px-3 py-2" />
-        <button id="gfSearch" class="bg-brand-blue text-white font-bold rounded-lg px-4 py-2">Buscar vuelos</button>
-      </div>
-      <div class="flex flex-wrap gap-3 mb-4">
-        <button id="openGoogleFlights" class="bg-slate-100 text-slate-800 font-semibold rounded-lg px-4 py-2">Abrir búsqueda en Google Flights</button>
-      </div>
-      <div id="gfStatus" class="text-sm text-slate-600 mb-3"></div>
-      <div id="gfResults" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow p-6">
-      <h3 class="text-xl font-bold mb-4">Listado (ABM)</h3>
-      <div class="overflow-auto">
-        <table class="w-full text-left min-w-[980px]">
-          <thead>
-            <tr class="border-b">
-              <th class="py-2">Tipo</th><th class="py-2">Nombre</th><th class="py-2">Fechas</th><th class="py-2">Precio</th><th class="py-2">Fotos</th><th class="py-2">Referido</th><th class="py-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="adminRows"></tbody>
-        </table>
-      </div>
-      <p id="adminEmpty" class="text-slate-500 mt-4">Sin registros aún.</p>
-    </div>
-  </section>
-
-  <script>
-    const STORAGE_KEY = 'viajes_horizonte_items';
-    const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?auto=format&fit=crop&w=900&q=80';
-
-    const tabUsuarioBtn = document.getElementById('tabUsuarioBtn');
-    const tabAdminBtn = document.getElementById('tabAdminBtn');
-    const tabUsuario = document.getElementById('tabUsuario');
-    const tabAdmin = document.getElementById('tabAdmin');
-
-    const form = document.getElementById('travelForm');
-    const itemId = document.getElementById('itemId');
-    const tipo = document.getElementById('tipo');
-    const nombre = document.getElementById('nombre');
-    const fechaInicio = document.getElementById('fechaInicio');
-    const fechaFin = document.getElementById('fechaFin');
-    const precio = document.getElementById('precio');
-    const link = document.getElementById('link');
-    const descripcion = document.getElementById('descripcion');
-    const fotos = document.getElementById('fotos');
-    const fotosPreview = document.getElementById('fotosPreview');
-
-    const adminRows = document.getElementById('adminRows');
-    const adminEmpty = document.getElementById('adminEmpty');
-
-    const carousels = {
-      paquetes: document.getElementById('carousel-paquetes'),
-      hoteles: document.getElementById('carousel-hoteles'),
-      pasajes: document.getElementById('carousel-pasajes'),
-      transportes: document.getElementById('carousel-transportes')
-    };
-
-    const gfApiKey = document.getElementById('gfApiKey');
-    const gfFrom = document.getElementById('gfFrom');
-    const gfTo = document.getElementById('gfTo');
-    const gfOutDate = document.getElementById('gfOutDate');
-    const gfReturnDate = document.getElementById('gfReturnDate');
-    const gfSearch = document.getElementById('gfSearch');
-    const openGoogleFlights = document.getElementById('openGoogleFlights');
-    const gfStatus = document.getElementById('gfStatus');
-    const gfResults = document.getElementById('gfResults');
-
-    let editExistingImages = [];
-
-    function getItems() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    }
-
-    function setItems(items) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
-
-    function switchTab(isAdmin) {
-      tabUsuario.classList.toggle('hidden-tab', isAdmin);
-      tabAdmin.classList.toggle('hidden-tab', !isAdmin);
-      tabUsuarioBtn.classList.toggle('bg-white', !isAdmin);
-      tabUsuarioBtn.classList.toggle('text-slate-900', !isAdmin);
-      tabAdminBtn.classList.toggle('bg-white', isAdmin);
-      tabAdminBtn.classList.toggle('text-slate-900', isAdmin);
-    }
-
-    function formatDates(fi, ff) {
-      if (!fi && !ff) return 'Fecha a confirmar';
-      if (fi && ff) return `${fi} → ${ff}`;
-      return fi || ff;
-    }
-
-    function safeImages(images) {
-      return Array.isArray(images) && images.length ? images : [PLACEHOLDER_IMAGE];
-    }
-
-    function renderImagePreview(urls) {
-      fotosPreview.innerHTML = '';
-      if (!urls.length) return;
-      urls.forEach((src) => {
-        const box = document.createElement('div');
-        box.className = 'h-24 rounded-lg overflow-hidden border';
-        box.innerHTML = `<img src="${src}" alt="preview" class="w-full h-full object-cover" />`;
-        fotosPreview.appendChild(box);
-      });
-    }
-
-    function clearForm() {
-      form.reset();
-      itemId.value = '';
-      editExistingImages = [];
-      renderImagePreview([]);
-    }
-
-    function fileToDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function readSelectedPhotos() {
-      const files = Array.from(fotos.files || []);
-      if (!files.length) return [];
-      return Promise.all(files.map(fileToDataUrl));
-    }
-
-    function addItem(payload) {
-      const items = getItems();
-      if (payload.id) {
-        const idx = items.findIndex(i => i.id === payload.id);
-        if (idx !== -1) items[idx] = payload;
-        else items.unshift(payload);
-      } else {
-        payload.id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-        items.unshift(payload);
-      }
-      setItems(items);
-      renderAll();
-    }
-
-    function editItem(id) {
-      const item = getItems().find(i => i.id === id);
-      if (!item) return;
-      itemId.value = item.id;
-      tipo.value = item.tipo;
-      nombre.value = item.nombre;
-      fechaInicio.value = item.fechaInicio || '';
-      fechaFin.value = item.fechaFin || '';
-      precio.value = item.precio;
-      link.value = item.link;
-      descripcion.value = item.descripcion || '';
-      editExistingImages = Array.isArray(item.images) ? item.images : [];
-      renderImagePreview(editExistingImages);
-      switchTab(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function deleteItem(id) {
-      setItems(getItems().filter(i => i.id !== id));
-      renderAll();
-    }
-
-    function buildOfferCard(item) {
-      const images = safeImages(item.images);
-      const showControls = images.length > 1;
-      const descriptionHtml = item.descripcion || '<em>Sin descripción adicional.</em>';
-
-      return `
-        <article class="min-w-[290px] max-w-[340px] bg-white p-5 rounded-xl shadow hover:shadow-lg transition snap-start border border-slate-100">
-          <p class="text-xs font-bold uppercase tracking-wide text-brand-orange mb-2">${item.tipo}</p>
-
-          <div class="relative mb-3 rounded-lg overflow-hidden border">
-            <img id="photo-img-${item.id}" data-photo-index="0" src="${images[0]}" alt="${item.nombre}" class="w-full h-44 object-cover" />
-            ${showControls ? `
-              <button data-photo-prev="${item.id}" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/55 text-white px-2 py-1 rounded"><i class="fas fa-chevron-left"></i></button>
-              <button data-photo-next="${item.id}" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/55 text-white px-2 py-1 rounded"><i class="fas fa-chevron-right"></i></button>
-              <span id="photo-counter-${item.id}" class="absolute bottom-2 right-2 text-xs bg-black/65 text-white px-2 py-1 rounded">1 / ${images.length}</span>
-            ` : ''}
-          </div>
-
-          <h4 class="font-bold text-lg text-slate-800">${item.nombre}</h4>
-          <p class="text-sm text-slate-500 mb-2">${formatDates(item.fechaInicio, item.fechaFin)}</p>
-          <div class="text-sm text-slate-600 mb-4">${descriptionHtml}</div>
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-xl font-extrabold text-brand-blue">${item.precio}</span>
-            <button data-open-link="${item.link}" class="bg-brand-blue hover:bg-blue-900 text-white text-sm font-semibold px-4 py-2 rounded-lg">Abrir link</button>
+  <main id="inicio">
+    <section class="hero">
+      <div class="container hero-grid">
+        <article class="hero-copy">
+          <div class="eyebrow" data-i18n="hero_eyebrow">Travel platform finalizable</div>
+          <h1 data-i18n="hero_title">Promos visibles, mapa real y base lista para crecer a vuelos personalizados.</h1>
+          <p data-i18n="hero_body">
+            El usuario busca por origen, destino, fechas y pasajeros. El admin carga promos, hoteles, vuelos,
+            escalas y links visibles. La app persiste en localStorage, importa/exporta JSON y ubica destinos sobre Leaflet.
+          </p>
+          <div class="hero-actions">
+            <a href="#buscador" class="button button--primary" data-i18n="hero_cta_search">Buscar viajes</a>
+            <a href="#promos" class="button button--secondary" data-i18n="nav_packages">Promos</a>
           </div>
         </article>
-      `;
-    }
 
-    function buildFinalIntegrationCard(fallbackLink) {
-      return `
-        <article class="min-w-[300px] max-w-[340px] bg-gradient-to-br from-brand-blue to-slate-800 text-white p-5 rounded-xl shadow snap-start">
-          <p class="text-xs uppercase font-bold tracking-wide text-orange-200 mb-2">Integración real</p>
-          <h4 class="font-bold text-lg mb-2">Abrir proveedor en una nueva pestaña</h4>
-          <p class="text-sm text-slate-100 mb-4">En la integración real, al apretar el botón se abre una pestaña nueva con tu link referido (ej: booking.com/referral=nico).</p>
-          <button data-open-link="${fallbackLink}" class="bg-brand-orange hover:bg-orange-600 text-white text-sm font-bold px-4 py-2 rounded-lg">Probar apertura de link</button>
-        </article>
-      `;
-    }
+        <aside class="hero-side">
+          <div class="stat-card">
+            <span data-i18n="hero_stat_packages">Promos activas</span>
+            <strong id="heroPackagesCount">0</strong>
+          </div>
+          <div class="stat-card">
+            <span data-i18n="hero_stat_countries">Paises cargados</span>
+            <strong id="heroCountriesCount">0</strong>
+          </div>
+          <div class="stat-card">
+            <span data-i18n="hero_stat_storage">Persistencia</span>
+            <strong>localStorage + JSON</strong>
+          </div>
+          <div class="hero-note">
+            <strong data-i18n="hero_note_title">Clave temporal admin</strong>
+            <span>1234</span>
+          </div>
+        </aside>
+      </div>
+    </section>
 
-    function onPhotoChange(itemId, direction) {
-      const all = getItems();
-      const item = all.find(i => i.id === itemId);
-      if (!item) return;
-      const images = safeImages(item.images);
-      if (images.length <= 1) return;
+    <section id="buscador" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow eyebrow--light" data-i18n="search_eyebrow">Buscador constructor</div>
+            <h2 data-i18n="search_title">Arma el viaje y filtra al instante</h2>
+            <p data-i18n="search_body">
+              Origen, destino y fechas son opcionales. La cantidad de adultos, niños y sus edades quedan disponibles
+              para filtrar hoy y para construir links de proveedor en el futuro.
+            </p>
+          </div>
+        </div>
 
-      const imgNode = document.getElementById(`photo-img-${itemId}`);
-      const counter = document.getElementById(`photo-counter-${itemId}`);
-      if (!imgNode) return;
+        <form id="searchForm" class="search-panel">
+          <div class="field">
+            <label for="searchOrigin" data-i18n="field_origin">Origen</label>
+            <input id="searchOrigin" type="text" list="airportSuggestions" placeholder="Ej: Montevideo o MVD" />
+          </div>
+          <div class="field">
+            <label for="searchDestination" data-i18n="field_destination">Destino</label>
+            <input id="searchDestination" type="text" list="citySuggestions" placeholder="Ej: Rio, Chile, Madrid" />
+          </div>
+          <div class="field">
+            <label for="searchStartDate" data-i18n="field_departure">Fecha ida</label>
+            <input id="searchStartDate" type="date" />
+          </div>
+          <div class="field">
+            <label for="searchEndDate" data-i18n="field_return">Fecha vuelta</label>
+            <input id="searchEndDate" type="date" />
+          </div>
+          <div class="field">
+            <label for="searchAdults" data-i18n="field_adults">Adultos</label>
+            <input id="searchAdults" type="number" min="1" max="12" value="1" />
+          </div>
+          <div class="field">
+            <label for="searchChildren" data-i18n="field_children">Niños</label>
+            <input id="searchChildren" type="number" min="0" max="6" value="0" />
+          </div>
+          <div class="field field--full children-age-field is-hidden">
+            <label data-i18n="field_child_ages">Edades de los niños</label>
+            <div id="childrenAges" class="children-grid"></div>
+          </div>
+          <div class="field field--full search-actions">
+            <button type="button" id="clearSearchButton" class="button button--secondary" data-i18n="search_clear">Limpiar filtros</button>
+            <button type="button" id="bookingShortcutButton" class="button button--primary" data-i18n="search_booking_shortcut">Buscar en Booking</button>
+            <div id="searchSummary" class="search-summary"></div>
+          </div>
+        </form>
+      </div>
+    </section>
 
-      const current = Number(imgNode.dataset.photoIndex || 0);
-      const next = (current + direction + images.length) % images.length;
-      imgNode.dataset.photoIndex = String(next);
-      imgNode.src = images[next];
-      if (counter) counter.textContent = `${next + 1} / ${images.length}`;
-    }
+    <section id="mini-booking" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow eyebrow--light" data-i18n="mini_booking_eyebrow">mini booking</div>
+            <h2 data-i18n="mini_booking_title">Buscador hotelero separado</h2>
+            <p data-i18n="mini_booking_body">
+              Panel específico para hoteles y afiliados. Genera links comparables de Booking, Expedia y Agoda
+              con destino, fechas, huéspedes y habitaciones.
+            </p>
+          </div>
+        </div>
 
-    function bindUserCardEvents() {
-      document.querySelectorAll('[data-open-link]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const href = btn.getAttribute('data-open-link');
-          if (!href) return;
-          window.open(href, '_blank', 'noopener,noreferrer');
-        });
-      });
-
-      document.querySelectorAll('[data-photo-prev]').forEach(btn => {
-        btn.addEventListener('click', () => onPhotoChange(btn.getAttribute('data-photo-prev'), -1));
-      });
-      document.querySelectorAll('[data-photo-next]').forEach(btn => {
-        btn.addEventListener('click', () => onPhotoChange(btn.getAttribute('data-photo-next'), 1));
-      });
-    }
-
-    function renderUserCarousels() {
-      const items = getItems();
-      const grouped = {
-        paquetes: items.filter(i => i.tipo === 'Paquete' || i.tipo === 'Crucero'),
-        hoteles: items.filter(i => i.tipo === 'Hotel'),
-        pasajes: items.filter(i => i.tipo === 'Pasaje'),
-        transportes: items.filter(i => i.tipo === 'Transporte')
-      };
-
-      Object.entries(carousels).forEach(([key, node]) => {
-        const list = grouped[key] || [];
-        const content = list.length
-          ? list.map(buildOfferCard).join('') + buildFinalIntegrationCard(list[0].link)
-          : `
-            <article class="min-w-[280px] bg-white p-5 rounded-xl shadow border border-dashed border-slate-300">
-              <h4 class="font-bold mb-2">Sin ofertas cargadas</h4>
-              <p class="text-sm text-slate-600">Cargá ofertas desde Admin para este carrusel.</p>
-            </article>
-            ${buildFinalIntegrationCard('https://www.booking.com/referral=nico')}
-          `;
-        node.innerHTML = content;
-      });
-
-      bindUserCardEvents();
-    }
-
-    function renderAdmin() {
-      const items = getItems();
-      adminRows.innerHTML = '';
-      adminEmpty.style.display = items.length ? 'none' : 'block';
-
-      items.forEach(item => {
-        const imgCount = Array.isArray(item.images) ? item.images.length : 0;
-        const tr = document.createElement('tr');
-        tr.className = 'border-b';
-        tr.innerHTML = `
-          <td class="py-2 pr-3">${item.tipo}</td>
-          <td class="py-2 pr-3 font-semibold">${item.nombre}</td>
-          <td class="py-2 pr-3">${formatDates(item.fechaInicio, item.fechaFin)}</td>
-          <td class="py-2 pr-3">${item.precio}</td>
-          <td class="py-2 pr-3">${imgCount}</td>
-          <td class="py-2 pr-3"><a class="text-blue-700 underline" href="${item.link}" target="_blank" rel="noopener">Ver link</a></td>
-          <td class="py-2 pr-3">
-            <div class="flex gap-2">
-              <button data-edit="${item.id}" class="px-3 py-1 bg-amber-100 text-amber-700 rounded">Editar</button>
-              <button data-del="${item.id}" class="px-3 py-1 bg-red-100 text-red-700 rounded">Eliminar</button>
+        <div class="mini-booking-layout">
+          <form id="miniBookingForm" class="search-panel mini-booking-panel">
+            <div class="field">
+              <label for="miniBookingDestination" data-i18n="field_destination">Destino</label>
+              <input id="miniBookingDestination" type="text" list="citySuggestions" placeholder="Ej: Madrid, Punta del Este, Bangkok" />
             </div>
-          </td>
-        `;
-        adminRows.appendChild(tr);
-      });
+            <div class="field">
+              <label for="miniBookingCountry" data-i18n="field_country">País</label>
+              <input id="miniBookingCountry" type="text" list="countrySuggestions" placeholder="Ej: España" />
+            </div>
+            <div class="field">
+              <label for="miniBookingCheckin">Check-in</label>
+              <input id="miniBookingCheckin" type="date" />
+            </div>
+            <div class="field">
+              <label for="miniBookingCheckout">Check-out</label>
+              <input id="miniBookingCheckout" type="date" />
+            </div>
+            <div class="field">
+              <label for="miniBookingAdults" data-i18n="field_adults">Adultos</label>
+              <input id="miniBookingAdults" type="number" min="1" max="8" value="2" />
+            </div>
+            <div class="field">
+              <label for="miniBookingChildren" data-i18n="field_children">Niños</label>
+              <input id="miniBookingChildren" type="number" min="0" max="6" value="0" />
+            </div>
+            <div class="field">
+              <label for="miniBookingRooms" data-i18n="mini_booking_rooms">Habitaciones</label>
+              <input id="miniBookingRooms" type="number" min="1" max="5" value="1" />
+            </div>
+            <div class="field">
+              <label for="miniBookingProvider" data-i18n="mini_booking_provider">Proveedor principal</label>
+              <select id="miniBookingProvider">
+                <option value="booking">Booking</option>
+                <option value="expedia">Expedia</option>
+                <option value="agoda">Agoda</option>
+              </select>
+            </div>
+            <div class="field field--full">
+              <label for="miniBookingDestId" data-i18n="mini_booking_dest_id">Booking dest_id opcional</label>
+              <input id="miniBookingDestId" type="text" placeholder="Ej: -390625. Si falta, se usa ss con texto." />
+            </div>
+            <div class="field field--full search-actions">
+              <button type="button" id="miniBookingReset" class="button button--secondary" data-i18n="mini_booking_reset">Limpiar panel hotel</button>
+              <div id="miniBookingSummary" class="search-summary"></div>
+            </div>
+          </form>
 
-      adminRows.querySelectorAll('[data-edit]').forEach(btn => {
-        btn.addEventListener('click', () => editItem(btn.getAttribute('data-edit')));
-      });
-      adminRows.querySelectorAll('[data-del]').forEach(btn => {
-        btn.addEventListener('click', () => deleteItem(btn.getAttribute('data-del')));
-      });
-    }
+          <div id="miniBookingResults" class="mini-booking-results"></div>
+        </div>
 
-    function scrollCarousel(name, direction) {
-      const node = carousels[name];
-      if (!node) return;
-      const amount = Math.round(node.clientWidth * 0.8) * direction;
-      node.scrollBy({ left: amount, behavior: 'smooth' });
-    }
-
-    function getGoogleFlightsLink() {
-      const from = (gfFrom.value || 'MVD').toUpperCase();
-      const to = (gfTo.value || 'MAD').toUpperCase();
-      const out = gfOutDate.value || '';
-      const back = gfReturnDate.value || '';
-      const params = new URLSearchParams({ from, to, out, back });
-      return `https://www.google.com/travel/flights?${params.toString()}`;
-    }
-
-    function renderGFResults(results) {
-      gfResults.innerHTML = '';
-      if (!results.length) {
-        gfResults.innerHTML = '<p class="text-slate-500">No hubo resultados parseables. Podés abrir Google Flights y cargar manualmente.</p>';
-        return;
-      }
-
-      results.forEach((r, idx) => {
-        const box = document.createElement('article');
-        box.className = 'border rounded-xl p-4 bg-slate-50';
-        box.innerHTML = `
-          <h4 class="font-bold mb-1">${r.title || `Vuelo opción ${idx + 1}`}</h4>
-          <p class="text-sm text-slate-600 mb-1">${r.route || 'Ruta no informada'}</p>
-          <p class="text-sm text-slate-700 mb-3"><strong>Ida/vuelta:</strong> ${r.price || 'Precio no disponible'}</p>
-          <div class="flex flex-wrap gap-2">
-            <button class="bg-brand-blue text-white px-3 py-2 rounded-lg" data-add-flight="${idx}">Agregar como Pasaje al ABM</button>
-            <a href="${r.link}" target="_blank" rel="noopener" class="bg-white border px-3 py-2 rounded-lg">Abrir proveedor</a>
+        <div class="section-head section-head--small">
+          <div>
+            <h3 class="subhead">Booking rápido por ciudad</h3>
+            <p>Destinos sugeridos con foto y link directo, usando tus filtros actuales cuando existan.</p>
           </div>
-        `;
-        gfResults.appendChild(box);
-      });
+        </div>
+        <div id="bookingQuickGrid" class="cards-grid cards-grid--compact"></div>
+      </div>
+    </section>
 
-      gfResults.querySelectorAll('[data-add-flight]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const r = results[Number(btn.getAttribute('data-add-flight'))];
-          addItem({
-            tipo: 'Pasaje',
-            nombre: r.title || 'Pasaje aéreo',
-            fechaInicio: gfOutDate.value,
-            fechaFin: gfReturnDate.value,
-            precio: r.price || 'Consultar',
-            link: r.link || getGoogleFlightsLink(),
-            descripcion: `Importado desde búsqueda de vuelos (${r.route || 'ruta'})`,
-            images: []
-          });
-          switchTab(true);
-          gfStatus.textContent = 'Vuelo agregado al ABM correctamente.';
-        });
-      });
-    }
+    <section id="promos" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow eyebrow--light" data-i18n="packages_eyebrow">Resultado visible</div>
+            <h2 data-i18n="packages_title">Promos y vuelos filtrados</h2>
+            <p data-i18n="packages_body">
+              Links visibles, ruta clara y datos de escalas para que el usuario entienda mejor lo que va a abrir.
+            </p>
+          </div>
+          <div class="results-pill">
+            <strong id="resultsCount">0</strong>
+            <span data-i18n="packages_results">resultados</span>
+          </div>
+        </div>
 
-    async function searchFlights() {
-      const from = gfFrom.value.trim().toUpperCase();
-      const to = gfTo.value.trim().toUpperCase();
-      const out = gfOutDate.value;
-      const back = gfReturnDate.value;
-      if (!from || !to || !out || !back) {
-        gfStatus.textContent = 'Completá origen, destino, fecha de ida y de vuelta.';
-        return;
-      }
+        <div id="packagesGrid" class="cards-grid"></div>
+      </div>
+    </section>
 
-      const key = gfApiKey.value.trim();
-      if (!key) {
-        gfStatus.textContent = 'Sin API key: no se consulta API externa. Usá "Abrir búsqueda en Google Flights" o cargá manualmente.';
-        renderGFResults([
-          {
-            title: `Vuelo ${from} → ${to}`,
-            route: `${from} ↔ ${to}`,
-            price: 'Precio a consultar en Google Flights',
-            link: getGoogleFlightsLink()
-          }
-        ]);
-        return;
-      }
+    <section id="mapa" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow eyebrow--light" data-i18n="map_eyebrow">Mapa de trabajo</div>
+            <h2 data-i18n="map_title">Mapa mundial con paquetes, países y rutas</h2>
+            <p data-i18n="map_body">
+              Los paquetes usan coordenadas reales o aproximadas. Las rutas de vuelo dibujan escalas cuando existen datos de origen, escala y destino.
+            </p>
+          </div>
+        </div>
 
-      try {
-        gfStatus.textContent = 'Consultando SerpAPI (Google Flights engine)...';
-        const url = new URL('https://serpapi.com/search.json');
-        url.searchParams.set('engine', 'google_flights');
-        url.searchParams.set('departure_id', from);
-        url.searchParams.set('arrival_id', to);
-        url.searchParams.set('outbound_date', out);
-        url.searchParams.set('return_date', back);
-        url.searchParams.set('type', '1');
-        url.searchParams.set('currency', 'USD');
-        url.searchParams.set('hl', 'es');
-        url.searchParams.set('api_key', key);
+        <div class="map-layout">
+          <div class="map-card">
+            <div class="map-toolbar">
+              <label><input id="togglePackagesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_packages">Paquetes</span></label>
+              <label><input id="toggleCountriesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_countries">Paises</span></label>
+              <label><input id="toggleRoutesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_routes">Rutas</span></label>
+            </div>
+            <div id="leafletMap" class="leaflet-map"></div>
+          </div>
 
-        const response = await fetch(url.toString());
-        if (!response.ok) throw new Error('Error HTTP consultando API');
+          <aside class="map-list" id="mapSidebar"></aside>
+        </div>
+      </div>
+    </section>
 
-        const data = await response.json();
-        const flights = (data.best_flights || data.other_flights || []).slice(0, 8).map((f) => {
-          const airline = f.flights?.map(x => x.airline).filter(Boolean).join(' / ');
-          const route = f.flights?.map(x => `${x.departure_airport?.id || '?'}-${x.arrival_airport?.id || '?'}`).join(' · ');
-          return {
-            title: airline || 'Vuelo ida y vuelta',
-            route: route || `${from} ↔ ${to}`,
-            price: f.price ? `USD ${f.price}` : 'Consultar',
-            link: data.search_metadata?.google_flights_url || getGoogleFlightsLink()
-          };
-        });
+    <section id="lugares" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow eyebrow--light" data-i18n="editorial_eyebrow">Capa editorial</div>
+            <h2 data-i18n="editorial_title">Lugares exóticos y tips reales</h2>
+            <p data-i18n="editorial_body">
+              La app no queda solo como catálogo. También funciona como sitio de inspiración y apoyo para cerrar la venta.
+            </p>
+          </div>
+        </div>
 
-        gfStatus.textContent = flights.length
-          ? `Resultados obtenidos: ${flights.length}. Podés agregarlos al ABM.`
-          : 'No se encontraron resultados, probá otros filtros.';
+        <div class="editorial-layout">
+          <div>
+            <h3 class="subhead" data-i18n="editorial_exotic_title">Destinos llamativos</h3>
+            <div id="exoticGrid" class="cards-grid cards-grid--compact"></div>
+          </div>
+          <div>
+            <h3 class="subhead" data-i18n="editorial_tips_title">Tips de viaje</h3>
+            <div id="tipsGrid" class="cards-grid cards-grid--compact"></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        renderGFResults(flights);
-      } catch (error) {
-        gfStatus.textContent = 'No se pudo consultar API externa (CORS / key / cuota). Podés abrir Google Flights y cargar manual.';
-        renderGFResults([
-          {
-            title: `Vuelo ${from} → ${to}`,
-            route: `${from} ↔ ${to}`,
-            price: 'Consulta manual requerida',
-            link: getGoogleFlightsLink()
-          }
-        ]);
-      }
-    }
+    <section id="paises" class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow eyebrow--light" data-i18n="countries_eyebrow">Directorio global</div>
+            <h2 data-i18n="countries_title">Todos los países por continente</h2>
+            <p data-i18n="countries_body">
+              La app intenta cargar el catálogo completo desde REST Countries y usa un fallback local si la API no responde.
+            </p>
+          </div>
+        </div>
 
-    function renderAll() {
-      renderAdmin();
-      renderUserCarousels();
-    }
+        <div class="toolbar-grid">
+          <div id="continentFilters" class="chip-row"></div>
+          <div class="field">
+            <label for="countrySearch" data-i18n="countries_search_label">Buscar país o ciudad</label>
+            <input id="countrySearch" type="search" placeholder="Ej: Peru, Tokyo, Oceania" />
+          </div>
+        </div>
 
-    fotos.addEventListener('change', async () => {
-      const selected = await readSelectedPhotos();
-      renderImagePreview([...editExistingImages, ...selected]);
-    });
+        <div id="countriesGrid" class="cards-grid cards-grid--compact"></div>
+      </div>
+    </section>
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const newImages = await readSelectedPhotos();
+  </main>
 
-      addItem({
-        id: itemId.value || undefined,
-        tipo: tipo.value,
-        nombre: nombre.value.trim(),
-        fechaInicio: fechaInicio.value,
-        fechaFin: fechaFin.value,
-        precio: precio.value.trim(),
-        link: link.value.trim(),
-        descripcion: descripcion.value.trim(),
-        images: [...editExistingImages, ...newImages]
-      });
+  <footer class="site-footer">
+    <div class="container">
+      <span data-i18n="footer_copy">Travel Site preparado para crecer a motor de paquetes y vuelos personalizados.</span>
+    </div>
+  </footer>
 
-      clearForm();
-      alert('Registro guardado en LocalStorage');
-    });
+  <datalist id="countrySuggestions"></datalist>
+  <datalist id="citySuggestions"></datalist>
+  <datalist id="airportSuggestions"></datalist>
 
-    document.getElementById('cancelEdit').addEventListener('click', clearForm);
-    document.getElementById('clearFormImages').addEventListener('click', () => {
-      editExistingImages = [];
-      fotos.value = '';
-      renderImagePreview([]);
-    });
+  <div id="modal" class="modal" aria-hidden="true"></div>
+  <div id="toast" class="toast" aria-live="polite"></div>
 
-    document.getElementById('clearAll').addEventListener('click', () => {
-      if (!confirm('¿Eliminar todos los registros?')) return;
-      setItems([]);
-      clearForm();
-      renderAll();
-    });
-
-    tabUsuarioBtn.addEventListener('click', () => switchTab(false));
-    tabAdminBtn.addEventListener('click', () => switchTab(true));
-
-    document.querySelectorAll('[data-carousel-prev]').forEach(btn => {
-      btn.addEventListener('click', () => scrollCarousel(btn.getAttribute('data-carousel-prev'), -1));
-    });
-    document.querySelectorAll('[data-carousel-next]').forEach(btn => {
-      btn.addEventListener('click', () => scrollCarousel(btn.getAttribute('data-carousel-next'), 1));
-    });
-
-    openGoogleFlights.addEventListener('click', () => {
-      window.open(getGoogleFlightsLink(), '_blank', 'noopener,noreferrer');
-    });
-
-    gfSearch.addEventListener('click', searchFlights);
-
-    if (!getItems().length) {
-      setItems([
-        {
-          id: 'demo-1',
-          tipo: 'Crucero',
-          nombre: 'Crucero Mediterráneo 10 noches',
-          fechaInicio: '2026-05-10',
-          fechaFin: '2026-05-20',
-          precio: 'USD 1.890',
-          link: 'https://www.cruisedirect.com/?ref=nico',
-          descripcion: '<strong>Incluye</strong> pensión completa y 2 excursiones.',
-          images: [
-            'https://images.unsplash.com/photo-1569263979104-865ab7cd8d13?auto=format&fit=crop&w=1000&q=80',
-            'https://images.unsplash.com/photo-1548574505-5e239809ee19?auto=format&fit=crop&w=1000&q=80'
-          ]
-        },
-        {
-          id: 'demo-2',
-          tipo: 'Hotel',
-          nombre: 'Hotel 4* Barcelona Centro',
-          fechaInicio: '2026-06-01',
-          fechaFin: '2026-06-07',
-          precio: 'USD 790',
-          link: 'https://www.booking.com/referral=nico',
-          descripcion: '<ul><li>Desayuno incluido</li><li>Cancelación flexible</li></ul>',
-          images: [
-            'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80',
-            'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=1000&q=80',
-            'https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=1000&q=80'
-          ]
-        },
-        {
-          id: 'demo-3',
-          tipo: 'Pasaje',
-          nombre: 'Pasaje Montevideo - Madrid',
-          fechaInicio: '2026-06-01',
-          fechaFin: '2026-06-20',
-          precio: 'USD 1.120',
-          link: 'https://www.google.com/travel/flights',
-          descripcion: 'Ida y vuelta con equipaje en bodega.',
-          images: [
-            'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1000&q=80'
-          ]
-        },
-        {
-          id: 'demo-4',
-          tipo: 'Transporte',
-          nombre: 'Traslado aeropuerto-hotel',
-          fechaInicio: '',
-          fechaFin: '',
-          precio: 'USD 45',
-          link: 'https://www.rome2rio.com/?ref=nico',
-          descripcion: 'Servicio adicional privado por tramo.',
-          images: [
-            'https://images.unsplash.com/photo-1556122071-e404eaedb77f?auto=format&fit=crop&w=1000&q=80'
-          ]
-        }
-      ]);
-    }
-
-    renderAll();
-  </script>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="./data.js" defer></script>
+  <script src="./i18n.js" defer></script>
+  <script src="./affiliate-links.js" defer></script>
+  <script src="./app.js" defer></script>
 </body>
 </html>

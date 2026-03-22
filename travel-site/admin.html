@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Travel Site Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-shell">
+      <a class="brand" href="./index.html">
+        <div class="brand__mark" aria-hidden="true"></div>
+        <div>
+          <strong>Travel Site Admin</strong>
+          <span>ABM Wizard + Configuración avanzada</span>
+        </div>
+      </a>
+      <nav class="top-nav">
+        <a href="./index.html">Volver al sitio usuario</a>
+      </nav>
+      <div class="header-actions">
+        <span class="storage-badge">Staff login</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="section section--admin">
+    <div class="container admin-shell">
+      <div id="adminLoginPanel" class="login-card">
+        <div class="field">
+          <label for="adminPassword">Password</label>
+          <input id="adminPassword" type="password" placeholder="1234" />
+        </div>
+        <button id="adminUnlockButton" type="button" class="button button--primary">Entrar</button>
+      </div>
+
+      <div id="adminApp" class="admin-app is-hidden">
+        <div class="admin-nav-menu">
+          <button type="button" class="chip is-active" data-panel-target="wizardPanel">Wizard</button>
+          <button type="button" class="chip" data-panel-target="listPanel">Cargados</button>
+          <button type="button" class="chip" data-panel-target="settingsPanel">Avanzadas</button>
+          <button type="button" class="chip" data-panel-target="dataPanel">Datos</button>
+        </div>
+
+        <section id="wizardPanel" class="admin-panel is-active">
+          <div class="form-card">
+            <h3>Wizard de carga</h3>
+            <form id="wizardForm" class="wizard-grid">
+              <input id="wizardItemId" type="hidden" />
+
+              <div class="field">
+                <label for="wizardType">1. Tipo</label>
+                <select id="wizardType">
+                  <option value="Hotel">Hotel</option>
+                  <option value="Pasaje">Pasaje</option>
+                  <option value="Crucero">Crucero</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="wizardProvider">2. Proveedor</label>
+                <select id="wizardProvider"></select>
+              </div>
+
+              <div class="field">
+                <label for="wizardTitle">Título</label>
+                <input id="wizardTitle" type="text" required />
+              </div>
+
+              <div class="field">
+                <label for="wizardVisibleLinkLabel">Texto del link</label>
+                <input id="wizardVisibleLinkLabel" type="text" placeholder="LINK AFILIADO HOTEL" />
+              </div>
+
+              <div class="field">
+                <label for="wizardStartDate">Fecha inicio</label>
+                <input id="wizardStartDate" type="date" />
+              </div>
+
+              <div class="field">
+                <label for="wizardEndDate">Fecha fin</label>
+                <input id="wizardEndDate" type="date" />
+              </div>
+
+              <div class="field">
+                <label for="wizardBasePrice">Precio base</label>
+                <input id="wizardBasePrice" type="text" placeholder="USD 500" />
+              </div>
+
+              <div class="field">
+                <label for="wizardFinalPrice">Precio final</label>
+                <input id="wizardFinalPrice" type="text" placeholder="USD 590 final" />
+              </div>
+
+              <div class="field">
+                <label for="wizardOriginCode">Origen IATA</label>
+                <input id="wizardOriginCode" type="text" list="airportSuggestions" placeholder="MVD" />
+              </div>
+
+              <div class="field">
+                <label for="wizardDestinationCode">Destino IATA</label>
+                <input id="wizardDestinationCode" type="text" list="airportSuggestions" placeholder="MAD" />
+              </div>
+
+              <div class="field">
+                <label for="wizardCountry">País destino</label>
+                <input id="wizardCountry" type="text" list="countrySuggestions" />
+              </div>
+
+              <div class="field">
+                <label for="wizardCity">Ciudad destino</label>
+                <input id="wizardCity" type="text" list="citySuggestions" />
+              </div>
+
+              <div class="field">
+                <label for="wizardRegion">Región/Barrio</label>
+                <input id="wizardRegion" type="text" />
+              </div>
+
+              <div class="field">
+                <label for="wizardAdults">Adultos (link)</label>
+                <input id="wizardAdults" type="number" min="1" max="12" value="2" />
+              </div>
+
+              <div class="field">
+                <label for="wizardChildren">Niños (link)</label>
+                <input id="wizardChildren" type="number" min="0" max="8" value="0" />
+              </div>
+
+              <div class="field">
+                <label for="wizardRooms">Habitaciones (hotel)</label>
+                <input id="wizardRooms" type="number" min="1" max="8" value="1" />
+              </div>
+
+              <div class="wizard-type-groups" data-type-group="Hotel">
+                <div class="field">
+                  <label for="wizardHotelName">Hotel</label>
+                  <input id="wizardHotelName" type="text" />
+                </div>
+                <div class="field">
+                  <label for="wizardBoardBasis">Régimen</label>
+                  <input id="wizardBoardBasis" type="text" placeholder="Desayuno" />
+                </div>
+              </div>
+
+              <div class="wizard-type-groups" data-type-group="Pasaje">
+                <div class="field">
+                  <label for="wizardAirline">Aerolínea</label>
+                  <input id="wizardAirline" type="text" />
+                </div>
+                <div class="field">
+                  <label for="wizardDuration">Duración</label>
+                  <input id="wizardDuration" type="text" placeholder="2h 40m" />
+                </div>
+                <div class="field field--full">
+                  <label for="wizardScales">Escalas</label>
+                  <textarea id="wizardScales" rows="2" placeholder="GRU | Sao Paulo"></textarea>
+                </div>
+              </div>
+
+              <div class="field field--full">
+                <label for="wizardSummary">Descripción</label>
+                <textarea id="wizardSummary" rows="3"></textarea>
+              </div>
+
+              <div class="field field--full">
+                <label for="wizardHighlights">Highlights</label>
+                <textarea id="wizardHighlights" rows="3" placeholder="Uno por línea"></textarea>
+              </div>
+
+              <div class="field field--full">
+                <label for="wizardImageUrls">URLs de imágenes</label>
+                <textarea id="wizardImageUrls" rows="3" placeholder="Una URL por línea"></textarea>
+              </div>
+
+              <div class="field field--full">
+                <label for="wizardGeneratedLink">Link generado</label>
+                <input id="wizardGeneratedLink" type="url" readonly />
+              </div>
+
+              <div class="field field--full form-actions">
+                <button type="button" id="wizardGenerateLink" class="button button--secondary">Generar link</button>
+                <a id="wizardOpenLink" class="button button--primary" href="#" target="_blank" rel="noreferrer">Abrir link</a>
+                <button type="submit" class="button button--primary">Guardar promo</button>
+                <button type="button" id="wizardReset" class="button button--secondary">Nuevo</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="listPanel" class="admin-panel">
+          <div class="form-card">
+            <h3>Promos cargadas</h3>
+            <p class="small-muted">Edición rápida desde el wizard y links siempre visibles.</p>
+            <div id="adminItemsGrid" class="cards-grid"></div>
+          </div>
+        </section>
+
+        <section id="settingsPanel" class="admin-panel">
+          <div class="form-card">
+            <h3>Configuración avanzada de plataformas</h3>
+            <div class="form-grid">
+              <div class="field">
+                <label for="cfgBookingAid">Booking `aid`</label>
+                <input id="cfgBookingAid" type="text" placeholder="opcional por ahora" />
+              </div>
+              <div class="field">
+                <label for="cfgExpediaCid">Expedia `cid`</label>
+                <input id="cfgExpediaCid" type="text" />
+              </div>
+              <div class="field">
+                <label for="cfgAgodaCid">Agoda `cid`</label>
+                <input id="cfgAgodaCid" type="text" />
+              </div>
+              <div class="field">
+                <label for="cfgSkyscannerPartner">Skyscanner `partner`</label>
+                <input id="cfgSkyscannerPartner" type="text" />
+              </div>
+              <div class="field">
+                <label for="cfgCruiseAffiliate">CruiseDirect `affiliate_id`</label>
+                <input id="cfgCruiseAffiliate" type="text" />
+              </div>
+              <div class="field">
+                <label for="cfgCampaign">Campaña UTM</label>
+                <input id="cfgCampaign" type="text" placeholder="travel_site_admin" />
+              </div>
+            </div>
+            <div class="form-actions" style="margin-top:16px;">
+              <button type="button" id="saveProviderSettings" class="button button--primary">Guardar configuración</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="dataPanel" class="admin-panel">
+          <div class="form-card">
+            <h3>Importar, exportar y defaults</h3>
+            <div class="form-actions">
+              <button type="button" id="exportJsonButton" class="button button--secondary">Exportar JSON</button>
+              <button type="button" id="importJsonButton" class="button button--secondary">Importar JSON</button>
+              <button type="button" id="restoreDefaultsButton" class="button button--secondary">Restaurar ejemplos</button>
+              <input id="importJsonInput" type="file" accept="application/json" hidden />
+            </div>
+            <div id="storageStatus" class="storage-badge" style="margin-top:14px;"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <datalist id="countrySuggestions"></datalist>
+  <datalist id="citySuggestions"></datalist>
+  <datalist id="airportSuggestions"></datalist>
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <script src="./data.js" defer></script>
+  <script src="./i18n.js" defer></script>
+  <script src="./affiliate-links.js" defer></script>
+  <script src="./admin-app.js" defer></script>
+</body>
+</html>
