@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Travel Site | Promos, mapa y admin</title>
+  <title>TRAVEL TIPS UY</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
+  <script>
+    window.TravelConfig = {
+      bookingProxyUrl: ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname) ? "/api/booking-hotels" : ""
+    };
+  </script>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -15,23 +20,31 @@
   />
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body>
+<body class="app-shell">
   <header class="site-header">
     <div class="container header-shell">
-      <a class="brand" href="#inicio">
+      <a class="brand" href="#home">
         <div class="brand__mark" aria-hidden="true"></div>
         <div>
-          <strong>Travel Site</strong>
-          <span data-i18n="brand_tagline">Promos, vuelos y destinos en una sola app</span>
+          <strong>TRAVEL TIPS UY</strong>
+          <span data-i18n="brand_tagline">Promos, hoteles, experiencias y cruceros en una sola app</span>
         </div>
       </a>
 
-      <nav class="top-nav">
-        <a href="#buscador" data-i18n="nav_search">Buscador</a>
-        <a href="#promos" data-i18n="nav_packages">Promos</a>
-        <a href="#mapa" data-i18n="nav_map">Mapa</a>
-        <a href="#paises" data-i18n="nav_countries">Paises</a>
-        <a href="#lugares" data-i18n="editorial_exotic_title">Lugares exóticos</a>
+      <nav class="top-nav tab-nav" aria-label="Secciones principales">
+        <a href="#home" class="tab-pill is-active" data-tab="home" data-i18n="nav_home">Home</a>
+        <a href="#about" class="tab-pill" data-tab="about">Acerca de</a>
+        <a href="#log" class="tab-pill" data-tab="log">Log</a>
+        <details class="legacy-menu">
+          <summary class="tab-pill">Pantallas viejas</summary>
+          <div class="legacy-menu__panel">
+            <button type="button" class="legacy-menu__item" data-tab="legacy-home">Home anterior</button>
+            <button type="button" class="legacy-menu__item" data-tab="offers" data-i18n="nav_packages">Paquetes en oferta</button>
+            <button type="button" class="legacy-menu__item" data-tab="hotel" data-i18n="nav_hotel">Sólo hotel</button>
+            <button type="button" class="legacy-menu__item" data-tab="experience" data-i18n="nav_experience">Experiencia</button>
+            <button type="button" class="legacy-menu__item" data-tab="cruises" data-i18n="nav_cruises">Cruceros</button>
+          </div>
+        </details>
       </nav>
 
       <div class="header-actions">
@@ -51,269 +64,438 @@
     </div>
   </header>
 
-  <main id="inicio">
-    <section class="hero">
-      <div class="container hero-grid">
-        <article class="hero-copy">
-          <div class="eyebrow" data-i18n="hero_eyebrow">Travel platform finalizable</div>
-          <h1 data-i18n="hero_title">Promos visibles, mapa real y base lista para crecer a vuelos personalizados.</h1>
-          <p data-i18n="hero_body">
-            El usuario busca por origen, destino, fechas y pasajeros. El admin carga promos, hoteles, vuelos,
-            escalas y links visibles. La app persiste en localStorage, importa/exporta JSON y ubica destinos sobre Leaflet.
-          </p>
-          <div class="hero-actions">
-            <a href="#buscador" class="button button--primary" data-i18n="hero_cta_search">Buscar viajes</a>
-            <a href="#promos" class="button button--secondary" data-i18n="nav_packages">Promos</a>
+  <main class="app-main">
+    <div class="tab-panels">
+      <section class="tab-page is-active" data-tab-panel="home">
+        <div class="container page-shell page-shell--home page-shell--home-new">
+          <div class="home-top-row">
+            <form id="homeQuickForm" class="home-form search-panel">
+              <div class="field field--city">
+                <label for="homeCity">Ciudad destino</label>
+                <span class="field__arrow" aria-hidden="true">➜</span>
+                <input id="homeCity" type="text" list="citySuggestions" placeholder="Ej: Madrid, Panamá, Río" />
+              </div>
+              <div class="field">
+                <label for="homeAdults">Adultos</label>
+                <input id="homeAdults" type="number" min="1" max="12" value="2" />
+              </div>
+              <div class="field">
+                <label for="homeChildren">Niños</label>
+                <input id="homeChildren" type="number" min="0" max="6" value="0" />
+              </div>
+              <div class="field field--full home-mode">
+                <label class="checkline"><input type="radio" name="homeMode" id="homeModeFlightHotel" value="flight-hotel" checked /> Vuelo + Hotel</label>
+                <label class="checkline"><input type="radio" name="homeMode" id="homeModeHotelOnly" value="hotel-only" /> Solo hotel</label>
+                <label class="checkline"><input type="checkbox" id="homeAirportTransport" /> Transporte al hotel</label>
+              </div>
+              <div class="field field--full home-flight-fields" data-home-flight-fields>
+                <div class="field">
+                  <label for="homeOrigin">Origen</label>
+                  <input id="homeOrigin" type="text" list="airportSuggestions" placeholder="Ej: Montevideo o MVD" />
+                </div>
+                <div class="field">
+                  <label for="homeDepartureDate">Salida</label>
+                  <input id="homeDepartureDate" type="date" />
+                </div>
+                <div class="field">
+                  <label for="homeReturnDate">Regreso</label>
+                  <input id="homeReturnDate" type="date" />
+                </div>
+              </div>
+              <div class="field field--full home-hotel-fields is-hidden" data-home-hotel-fields>
+                <div class="field">
+                  <label for="homeCheckin">Check-in</label>
+                  <input id="homeCheckin" type="date" />
+                </div>
+                <div class="field">
+                  <label for="homeCheckout">Check-out</label>
+                  <input id="homeCheckout" type="date" />
+                </div>
+              </div>
+            </form>
           </div>
-        </article>
 
-        <aside class="hero-side">
-          <div class="stat-card">
-            <span data-i18n="hero_stat_packages">Promos activas</span>
-            <strong id="heroPackagesCount">0</strong>
-          </div>
-          <div class="stat-card">
-            <span data-i18n="hero_stat_countries">Paises cargados</span>
-            <strong id="heroCountriesCount">0</strong>
-          </div>
-          <div class="stat-card">
-            <span data-i18n="hero_stat_storage">Persistencia</span>
-            <strong>localStorage + JSON</strong>
-          </div>
-          <div class="hero-note">
-            <strong data-i18n="hero_note_title">Clave temporal admin</strong>
-            <span>1234</span>
-          </div>
-        </aside>
-      </div>
-    </section>
+          <div class="home-results-grid">
+            <section class="panel-card home-column">
+              <div class="section-head section-head--compact">
+                <div>
+                  <div class="eyebrow eyebrow--light">Vuelos</div>
+                  <h2>Opciones rápidas</h2>
+                  <p>Se muestran solo si elegiste vuelo + hotel.</p>
+                </div>
+              </div>
+              <div id="homeFlightsGrid" class="home-card-stack"></div>
+            </section>
 
-    <section id="buscador" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow eyebrow--light" data-i18n="search_eyebrow">Buscador constructor</div>
-            <h2 data-i18n="search_title">Arma el viaje y filtra al instante</h2>
-            <p data-i18n="search_body">
-              Origen, destino y fechas son opcionales. La cantidad de adultos, niños y sus edades quedan disponibles
-              para filtrar hoy y para construir links de proveedor en el futuro.
+            <section class="panel-card home-column">
+              <div class="section-head section-head--compact">
+                <div>
+                  <div class="eyebrow eyebrow--light">Hoteles</div>
+                  <h2>10 hoteles listos</h2>
+                  <p id="homeHotelsSummary">Escribí una ciudad y salí del campo para cargar hoteles.</p>
+                </div>
+              </div>
+              <div id="homeHotelsGrid" class="home-card-stack home-card-stack--hotel"></div>
+            </section>
+
+            <section class="panel-card home-column home-column--map">
+              <div class="section-head section-head--compact">
+                <div>
+                  <div class="eyebrow eyebrow--light">Mapa</div>
+                  <h2>Ruta viva</h2>
+                  <p>Se repinta en focus out con origen, escalas y destino o solo destino según el modo.</p>
+                </div>
+              </div>
+              <div id="homeTripMap" class="mini-map-frame home-map-frame"></div>
+              <div id="homeTripSummary" class="search-summary home-trip-summary"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-page" data-tab-panel="about">
+        <div class="container page-shell page-shell--about">
+          <section class="about-panel about-panel--page">
+            <div class="about-panel__icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64" role="img" focusable="false">
+                <circle cx="32" cy="32" r="28" fill="rgba(20,85,107,0.12)" />
+                <path d="M32 14l7 14 15 4-15 4-7 14-7-14-15-4 15-4z" fill="currentColor" />
+              </svg>
+            </div>
+            <div class="about-panel__copy">
+              <div class="eyebrow eyebrow--light">Acerca de</div>
+              <h2>Un proyecto hecho para viajar mejor, sin sumar fricción.</h2>
+              <p>
+                TRAVEL TIPS UY nació por una necesidad personal: tener una plataforma inteligente que ayude a organizar mis viajes,
+                comparar opciones y tomar decisiones más rápido. La idea final es funcionar como un agente de turismo personalizado,
+                pero sin cobrarte extra, porque la compra termina ocurriendo directo en Booking y en aerolíneas.
+              </p>
+              <p>
+                El foco está en simplificar lo importante: mostrar opciones claras, acompañar con contexto útil y ahorrar tiempo
+                sin alejarte de la reserva real. Menos ruido, más criterio, más control.
+              </p>
+            </div>
+            <div class="about-panel__values">
+              <article class="value-card">
+                <span class="value-card__icon" aria-hidden="true">🧭</span>
+                <h3>Orientación</h3>
+                <p>Te ayuda a ordenar ideas, destinos y precios en una sola vista.</p>
+              </article>
+              <article class="value-card">
+                <span class="value-card__icon" aria-hidden="true">🤝</span>
+                <h3>Sin sobrecosto</h3>
+                <p>La propuesta es guiarte, no encarecerte la compra final.</p>
+              </article>
+              <article class="value-card">
+                <span class="value-card__icon" aria-hidden="true">✈️</span>
+                <h3>Acción real</h3>
+                <p>Reservás donde corresponde: Booking y aerolíneas, con más claridad antes de salir.</p>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="tab-page" data-tab-panel="log">
+        <div class="container page-shell page-shell--log">
+          <section class="panel-card log-panel">
+            <div class="section-head section-head--compact">
+              <div>
+                <div class="eyebrow eyebrow--light">Log</div>
+                <h2>Actividad en vivo</h2>
+                <p>Acá se ven los eventos de ciudad destino, foco fuera, Booking y catálogo local.</p>
+              </div>
+            </div>
+            <div class="log-panel__toolbar">
+              <button type="button" class="button button--secondary button--tiny" id="logClearButton">Limpiar log</button>
+              <span id="logStatus" class="small-muted">Esperando eventos...</span>
+            </div>
+            <div id="logFeed" class="log-feed"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="tab-page" data-tab-panel="legacy-home">
+        <div class="container page-shell page-shell--home">
+          <article class="hero-copy hero-copy--home">
+            <div class="eyebrow" data-i18n="hero_eyebrow">Pantallas viejas</div>
+            <h1 data-i18n="hero_title">Promos visibles, mapa real y base lista para crecer a vuelos personalizados.</h1>
+            <p data-i18n="hero_body">
+              El usuario busca por origen, destino, fechas y pasajeros. El admin carga promos, hoteles, vuelos,
+              escalas y links visibles. La app persiste en localStorage, importa/exporta JSON y ubica destinos sobre Leaflet.
             </p>
+            <div class="hero-actions">
+              <button type="button" class="button button--primary" data-jump-tab="offers" data-i18n="hero_cta_search">Buscar viajes</button>
+              <button type="button" class="button button--secondary" data-jump-tab="hotel">Buscar hotel</button>
+            </div>
+          </article>
+
+          <aside class="hero-tools">
+            <div class="panel-card">
+              <div class="section-head section-head--compact">
+                <div>
+                  <div class="eyebrow eyebrow--light" data-i18n="search_eyebrow">Buscador constructor</div>
+                  <h2 data-i18n="search_title">Arma el viaje y filtra al instante</h2>
+                  <p data-i18n="search_body">
+                    Origen, destino y fechas son opcionales. La cantidad de adultos, niños y sus edades quedan disponibles
+                    para filtrar hoy y para construir links de proveedor en el futuro.
+                  </p>
+                </div>
+              </div>
+
+              <form id="searchForm" class="search-panel search-panel--home">
+                <div class="field">
+                  <label for="searchOrigin" data-i18n="field_origin">Origen</label>
+                  <input id="searchOrigin" type="text" list="airportSuggestions" placeholder="Ej: Montevideo o MVD" />
+                </div>
+                <div class="field">
+                  <label for="searchDestination" data-i18n="field_destination">Destino</label>
+                  <input id="searchDestination" type="text" list="citySuggestions" placeholder="Ej: Rio, Chile, Madrid" />
+                </div>
+                <div class="field">
+                  <label for="searchStartDate" data-i18n="field_departure">Fecha ida</label>
+                  <input id="searchStartDate" type="date" />
+                </div>
+                <div class="field">
+                  <label for="searchEndDate" data-i18n="field_return">Fecha vuelta</label>
+                  <input id="searchEndDate" type="date" />
+                </div>
+                <div class="field">
+                  <label for="searchAdults" data-i18n="field_adults">Adultos</label>
+                  <input id="searchAdults" type="number" min="1" max="12" value="1" />
+                </div>
+                <div class="field">
+                  <label for="searchChildren" data-i18n="field_children">Niños</label>
+                  <input id="searchChildren" type="number" min="0" max="6" value="0" />
+                </div>
+                <div class="field field--full children-age-field is-hidden">
+                  <label data-i18n="field_child_ages">Edades de los niños</label>
+                  <div id="childrenAges" class="children-grid"></div>
+                </div>
+                <div class="field field--full search-actions">
+                  <button type="button" id="clearSearchButton" class="button button--secondary" data-i18n="search_clear">Limpiar filtros</button>
+                  <button type="button" id="bookingShortcutButton" class="button button--primary" data-i18n="search_booking_shortcut">Buscar en Booking</button>
+                  <div id="searchSummary" class="search-summary"></div>
+                </div>
+              </form>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="tab-page" data-tab-panel="offers">
+        <div class="container page-shell page-shell--offers">
+          <div class="section-head section-head--compact">
+            <div>
+              <div class="eyebrow eyebrow--light" data-i18n="packages_eyebrow">Resultado visible</div>
+              <h2 data-i18n="packages_title">Paquetes en oferta</h2>
+              <p data-i18n="packages_body">
+                Links visibles, ruta clara y datos de escalas para que el usuario entienda mejor lo que va a abrir.
+              </p>
+            </div>
+            <div class="results-pill">
+              <strong id="resultsCount">0</strong>
+              <span data-i18n="packages_results">resultados</span>
+            </div>
+          </div>
+
+          <div class="split-layout split-layout--offers">
+            <div class="split-layout__main">
+              <div id="packagesGrid" class="cards-grid cards-grid--compact cards-grid--offers"></div>
+            </div>
+            <aside class="split-layout__side">
+              <div class="panel-card panel-card--tight">
+                <div class="section-head section-head--compact">
+                  <div>
+                    <h3 class="subhead">Mapa de ofertas</h3>
+                    <p>Una lectura rápida de destinos, origen y rutas para reforzar la venta.</p>
+                  </div>
+                </div>
+                <div id="packagesMiniMap" class="mini-map-frame"></div>
+              </div>
+              <aside id="mapSidebar" class="map-list map-list--compact"></aside>
+            </aside>
           </div>
         </div>
+      </section>
 
-        <form id="searchForm" class="search-panel">
-          <div class="field">
-            <label for="searchOrigin" data-i18n="field_origin">Origen</label>
-            <input id="searchOrigin" type="text" list="airportSuggestions" placeholder="Ej: Montevideo o MVD" />
+      <section class="tab-page" data-tab-panel="hotel">
+        <div class="container page-shell page-shell--hotel">
+          <div class="section-head section-head--compact">
+            <div>
+              <div class="eyebrow eyebrow--light" data-i18n="mini_booking_eyebrow">Buscador hotelero personalizado</div>
+              <h2>Buscar de hotel personalizado</h2>
+              <p>
+                Compara precios de forma muy rápida, adaptado a tu presupuesto y sin cobrar un adicional.
+              </p>
+            </div>
           </div>
-          <div class="field">
-            <label for="searchDestination" data-i18n="field_destination">Destino</label>
-            <input id="searchDestination" type="text" list="citySuggestions" placeholder="Ej: Rio, Chile, Madrid" />
-          </div>
-          <div class="field">
-            <label for="searchStartDate" data-i18n="field_departure">Fecha ida</label>
-            <input id="searchStartDate" type="date" />
-          </div>
-          <div class="field">
-            <label for="searchEndDate" data-i18n="field_return">Fecha vuelta</label>
-            <input id="searchEndDate" type="date" />
-          </div>
-          <div class="field">
-            <label for="searchAdults" data-i18n="field_adults">Adultos</label>
-            <input id="searchAdults" type="number" min="1" max="12" value="1" />
-          </div>
-          <div class="field">
-            <label for="searchChildren" data-i18n="field_children">Niños</label>
-            <input id="searchChildren" type="number" min="0" max="6" value="0" />
-          </div>
-          <div class="field field--full children-age-field is-hidden">
-            <label data-i18n="field_child_ages">Edades de los niños</label>
-            <div id="childrenAges" class="children-grid"></div>
-          </div>
-          <div class="field field--full search-actions">
-            <button type="button" id="clearSearchButton" class="button button--secondary" data-i18n="search_clear">Limpiar filtros</button>
-            <button type="button" id="bookingShortcutButton" class="button button--primary" data-i18n="search_booking_shortcut">Buscar en Booking</button>
-            <div id="searchSummary" class="search-summary"></div>
-          </div>
-        </form>
-      </div>
-    </section>
 
-    <section id="mini-booking" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow eyebrow--light" data-i18n="mini_booking_eyebrow">mini booking</div>
-            <h2 data-i18n="mini_booking_title">Buscador hotelero separado</h2>
-            <p data-i18n="mini_booking_body">
-              Panel específico para hoteles y afiliados. Genera links comparables de Booking, Expedia y Agoda
-              con destino, fechas, huéspedes y habitaciones.
-            </p>
+          <div class="split-layout split-layout--hotel">
+            <div class="split-layout__main">
+              <form id="miniBookingForm" class="search-panel mini-booking-panel hotel-search-panel">
+                <div class="field">
+                  <label for="miniBookingDestination">Ciudad destino</label>
+                  <input id="miniBookingDestination" type="text" list="citySuggestions" placeholder="Ej: Madrid, Punta del Este, Bangkok" />
+                </div>
+                <div class="field">
+                  <label for="miniBookingCountry" data-i18n="field_country">País</label>
+                  <input id="miniBookingCountry" type="text" list="countrySuggestions" placeholder="Ej: España" />
+                </div>
+                <div class="field">
+                  <label for="miniBookingCheckin">Check-in</label>
+                  <input id="miniBookingCheckin" type="date" />
+                </div>
+                <div class="field">
+                  <label for="miniBookingCheckout">Check-out</label>
+                  <input id="miniBookingCheckout" type="date" />
+                </div>
+                <div class="field">
+                  <label for="miniBookingAdults" data-i18n="field_adults">Adultos</label>
+                  <input id="miniBookingAdults" type="number" min="1" max="8" value="2" />
+                </div>
+                <div class="field">
+                  <label for="miniBookingChildren" data-i18n="field_children">Niños</label>
+                  <input id="miniBookingChildren" type="number" min="0" max="6" value="0" />
+                </div>
+                <div class="field">
+                  <label for="miniBookingRooms" data-i18n="mini_booking_rooms">Habitaciones</label>
+                  <input id="miniBookingRooms" type="number" min="1" max="5" value="1" />
+                </div>
+                <div class="field">
+                  <label for="miniBookingProvider" data-i18n="mini_booking_provider">Proveedor principal</label>
+                  <select id="miniBookingProvider">
+                    <option value="booking">Booking</option>
+                    <option value="expedia">Expedia</option>
+                    <option value="agoda">Agoda</option>
+                  </select>
+                </div>
+                <div class="field field--full">
+                  <label for="miniBookingDestId" data-i18n="mini_booking_dest_id">Booking dest_id opcional</label>
+                  <input id="miniBookingDestId" type="text" placeholder="Ej: -390625. Si falta, se usa ss con texto." />
+                </div>
+                <div class="field field--full hotel-cta-row">
+                  <button type="button" class="button button--secondary" data-hotel-provider="booking">Abrir Booking</button>
+                  <button type="button" class="button button--secondary" data-hotel-provider="expedia">Abrir Expedia</button>
+                  <button type="button" class="button button--secondary" data-hotel-provider="agoda">Abrir Agoda</button>
+                  <button type="button" id="miniBookingReset" class="button button--primary" data-i18n="mini_booking_reset">Limpiar panel hotel</button>
+                  <div id="miniBookingSummary" class="search-summary"></div>
+                </div>
+              </form>
+            </div>
+
+            <aside class="split-layout__side">
+              <div class="panel-card panel-card--tight">
+                <div class="section-head section-head--compact">
+                  <div>
+                    <h3 class="subhead">Mini mapa hotelero</h3>
+                    <p>Se repinta cuando sale de foco la ciudad seleccionada y orienta la búsqueda.</p>
+                  </div>
+                </div>
+                <div id="hotelMiniMap" class="mini-map-frame"></div>
+              </div>
+              <div id="miniBookingResults" class="mini-booking-results"></div>
+            </aside>
+          </div>
+
+          <div class="section-head section-head--compact section-head--stacked">
+            <div>
+              <h3 class="subhead">Booking rápido por ciudad</h3>
+              <p>Destinos sugeridos con foto y link directo, usando tus filtros actuales cuando existan.</p>
+            </div>
+          </div>
+          <div id="bookingQuickGrid" class="cards-grid cards-grid--compact cards-grid--hotel"></div>
+
+          <div class="section-head section-head--compact section-head--stacked">
+            <div>
+              <h3 class="subhead">10 hoteles sugeridos</h3>
+              <p id="hotelSuggestionsSummary">Selecciona una ciudad y al salir del campo cargaremos opciones para esa zona.</p>
+            </div>
+          </div>
+          <div id="hotelSuggestionsGrid" class="cards-grid cards-grid--compact cards-grid--hotel hotel-suggestions-grid"></div>
+        </div>
+      </section>
+
+      <section class="tab-page" data-tab-panel="experience">
+        <div class="container page-shell page-shell--experience">
+          <div class="section-head section-head--compact">
+            <div>
+              <div class="eyebrow eyebrow--light" data-i18n="editorial_eyebrow">Capa editorial</div>
+              <h2>Experiencia</h2>
+              <p>
+                Reunimos destinos llamativos, tips de viaje y todos los países por continente en una sola pantalla.
+              </p>
+            </div>
+          </div>
+
+          <div class="experience-grid">
+            <section class="panel-card">
+              <h3 class="subhead" data-i18n="editorial_exotic_title">Destinos llamativos</h3>
+              <div id="exoticGrid" class="cards-grid cards-grid--compact"></div>
+            </section>
+            <section class="panel-card">
+              <h3 class="subhead" data-i18n="editorial_tips_title">Tips de viaje</h3>
+              <div id="tipsGrid" class="cards-grid cards-grid--compact"></div>
+            </section>
+            <section class="panel-card">
+              <div class="toolbar-grid toolbar-grid--tight">
+                <div>
+                  <div class="eyebrow eyebrow--light" data-i18n="countries_eyebrow">Directorio global</div>
+                  <h3 class="subhead" data-i18n="countries_title">Todos los países por continente</h3>
+                </div>
+                <div class="field">
+                  <label for="countrySearch" data-i18n="countries_search_label">Buscar país o ciudad</label>
+                  <input id="countrySearch" type="search" placeholder="Ej: Peru, Tokyo, Oceania" />
+                </div>
+              </div>
+              <div id="continentFilters" class="chip-row"></div>
+              <div id="countriesGrid" class="cards-grid cards-grid--compact"></div>
+            </section>
           </div>
         </div>
+      </section>
 
-        <div class="mini-booking-layout">
-          <form id="miniBookingForm" class="search-panel mini-booking-panel">
-            <div class="field">
-              <label for="miniBookingDestination" data-i18n="field_destination">Destino</label>
-              <input id="miniBookingDestination" type="text" list="citySuggestions" placeholder="Ej: Madrid, Punta del Este, Bangkok" />
+      <section class="tab-page" data-tab-panel="cruises">
+        <div class="container page-shell page-shell--cruises">
+          <div class="section-head section-head--compact">
+            <div>
+              <div class="eyebrow eyebrow--light" data-i18n="map_eyebrow">Mapa de trabajo</div>
+              <h2 data-i18n="map_title">Mapa mundial con paquetes, países y rutas</h2>
+              <p data-i18n="map_body">
+                Los paquetes usan coordenadas reales o aproximadas. Las rutas de vuelo dibujan escalas cuando existen datos de origen, escala y destino.
+              </p>
             </div>
-            <div class="field">
-              <label for="miniBookingCountry" data-i18n="field_country">País</label>
-              <input id="miniBookingCountry" type="text" list="countrySuggestions" placeholder="Ej: España" />
-            </div>
-            <div class="field">
-              <label for="miniBookingCheckin">Check-in</label>
-              <input id="miniBookingCheckin" type="date" />
-            </div>
-            <div class="field">
-              <label for="miniBookingCheckout">Check-out</label>
-              <input id="miniBookingCheckout" type="date" />
-            </div>
-            <div class="field">
-              <label for="miniBookingAdults" data-i18n="field_adults">Adultos</label>
-              <input id="miniBookingAdults" type="number" min="1" max="8" value="2" />
-            </div>
-            <div class="field">
-              <label for="miniBookingChildren" data-i18n="field_children">Niños</label>
-              <input id="miniBookingChildren" type="number" min="0" max="6" value="0" />
-            </div>
-            <div class="field">
-              <label for="miniBookingRooms" data-i18n="mini_booking_rooms">Habitaciones</label>
-              <input id="miniBookingRooms" type="number" min="1" max="5" value="1" />
-            </div>
-            <div class="field">
-              <label for="miniBookingProvider" data-i18n="mini_booking_provider">Proveedor principal</label>
-              <select id="miniBookingProvider">
-                <option value="booking">Booking</option>
-                <option value="expedia">Expedia</option>
-                <option value="agoda">Agoda</option>
-              </select>
-            </div>
-            <div class="field field--full">
-              <label for="miniBookingDestId" data-i18n="mini_booking_dest_id">Booking dest_id opcional</label>
-              <input id="miniBookingDestId" type="text" placeholder="Ej: -390625. Si falta, se usa ss con texto." />
-            </div>
-            <div class="field field--full search-actions">
-              <button type="button" id="miniBookingReset" class="button button--secondary" data-i18n="mini_booking_reset">Limpiar panel hotel</button>
-              <div id="miniBookingSummary" class="search-summary"></div>
-            </div>
-          </form>
+          </div>
 
-          <div id="miniBookingResults" class="mini-booking-results"></div>
-        </div>
-
-        <div class="section-head section-head--small">
-          <div>
-            <h3 class="subhead">Booking rápido por ciudad</h3>
-            <p>Destinos sugeridos con foto y link directo, usando tus filtros actuales cuando existan.</p>
+          <div class="split-layout split-layout--cruises">
+            <div class="split-layout__main">
+              <div class="panel-card panel-card--tight">
+                <div class="map-toolbar">
+                  <label><input id="togglePackagesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_packages">Paquetes</span></label>
+                  <label><input id="toggleCountriesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_countries">Paises</span></label>
+                  <label><input id="toggleRoutesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_routes">Rutas</span></label>
+                </div>
+                <div id="leafletMap" class="leaflet-map leaflet-map--cruises"></div>
+              </div>
+            </div>
+            <aside class="split-layout__side">
+              <aside id="mapSidebar" class="map-list map-list--compact"></aside>
+              <div class="panel-card panel-card--tight panel-card--note">
+                <h3 class="subhead">Cruceros</h3>
+                <p>
+                  En la próxima iteración vamos a transformar esta vista en la página madre de cruceros, usando el mismo mapa como núcleo visual.
+                </p>
+              </div>
+            </aside>
           </div>
         </div>
-        <div id="bookingQuickGrid" class="cards-grid cards-grid--compact"></div>
-      </div>
-    </section>
-
-    <section id="promos" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow eyebrow--light" data-i18n="packages_eyebrow">Resultado visible</div>
-            <h2 data-i18n="packages_title">Promos y vuelos filtrados</h2>
-            <p data-i18n="packages_body">
-              Links visibles, ruta clara y datos de escalas para que el usuario entienda mejor lo que va a abrir.
-            </p>
-          </div>
-          <div class="results-pill">
-            <strong id="resultsCount">0</strong>
-            <span data-i18n="packages_results">resultados</span>
-          </div>
-        </div>
-
-        <div id="packagesGrid" class="cards-grid"></div>
-      </div>
-    </section>
-
-    <section id="mapa" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow eyebrow--light" data-i18n="map_eyebrow">Mapa de trabajo</div>
-            <h2 data-i18n="map_title">Mapa mundial con paquetes, países y rutas</h2>
-            <p data-i18n="map_body">
-              Los paquetes usan coordenadas reales o aproximadas. Las rutas de vuelo dibujan escalas cuando existen datos de origen, escala y destino.
-            </p>
-          </div>
-        </div>
-
-        <div class="map-layout">
-          <div class="map-card">
-            <div class="map-toolbar">
-              <label><input id="togglePackagesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_packages">Paquetes</span></label>
-              <label><input id="toggleCountriesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_countries">Paises</span></label>
-              <label><input id="toggleRoutesLayer" type="checkbox" checked /> <span data-i18n="map_toggle_routes">Rutas</span></label>
-            </div>
-            <div id="leafletMap" class="leaflet-map"></div>
-          </div>
-
-          <aside class="map-list" id="mapSidebar"></aside>
-        </div>
-      </div>
-    </section>
-
-    <section id="lugares" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow eyebrow--light" data-i18n="editorial_eyebrow">Capa editorial</div>
-            <h2 data-i18n="editorial_title">Lugares exóticos y tips reales</h2>
-            <p data-i18n="editorial_body">
-              La app no queda solo como catálogo. También funciona como sitio de inspiración y apoyo para cerrar la venta.
-            </p>
-          </div>
-        </div>
-
-        <div class="editorial-layout">
-          <div>
-            <h3 class="subhead" data-i18n="editorial_exotic_title">Destinos llamativos</h3>
-            <div id="exoticGrid" class="cards-grid cards-grid--compact"></div>
-          </div>
-          <div>
-            <h3 class="subhead" data-i18n="editorial_tips_title">Tips de viaje</h3>
-            <div id="tipsGrid" class="cards-grid cards-grid--compact"></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="paises" class="section">
-      <div class="container">
-        <div class="section-head">
-          <div>
-            <div class="eyebrow eyebrow--light" data-i18n="countries_eyebrow">Directorio global</div>
-            <h2 data-i18n="countries_title">Todos los países por continente</h2>
-            <p data-i18n="countries_body">
-              La app intenta cargar el catálogo completo desde REST Countries y usa un fallback local si la API no responde.
-            </p>
-          </div>
-        </div>
-
-        <div class="toolbar-grid">
-          <div id="continentFilters" class="chip-row"></div>
-          <div class="field">
-            <label for="countrySearch" data-i18n="countries_search_label">Buscar país o ciudad</label>
-            <input id="countrySearch" type="search" placeholder="Ej: Peru, Tokyo, Oceania" />
-          </div>
-        </div>
-
-        <div id="countriesGrid" class="cards-grid cards-grid--compact"></div>
-      </div>
-    </section>
-
+      </section>
+    </div>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer site-footer--compact">
     <div class="container">
-      <span data-i18n="footer_copy">Travel Site preparado para crecer a motor de paquetes y vuelos personalizados.</span>
+      <span data-i18n="footer_copy">TRAVEL TIPS UY preparado para crecer a motor de paquetes, hoteles, cruceros y experiencias.</span>
     </div>
   </footer>
 
@@ -323,6 +505,31 @@
 
   <div id="modal" class="modal" aria-hidden="true"></div>
   <div id="toast" class="toast" aria-live="polite"></div>
+  <div id="travelCursor" class="travel-cursor" aria-hidden="true">
+    <div class="travel-cursor__glow"></div>
+    <div class="travel-cursor__plane">
+      <svg viewBox="0 0 64 64" role="presentation" aria-hidden="true">
+        <path d="M12 40l20-5 6-18 5-1 2 15 17 2v5l-16 3-2 15-5 1-7-15-17-2z" fill="currentColor" />
+        <path d="M24 23l8 8" stroke="white" stroke-width="3" stroke-linecap="round" />
+        <path d="M14 44h12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-dasharray="5 4" />
+      </svg>
+    </div>
+  </div>
+
+  <section id="offerChatbot" class="chatbot" aria-label="Asistente de ofertas">
+    <button type="button" id="chatbotToggle" class="chatbot__toggle">Ofertas</button>
+    <div class="chatbot__panel is-open">
+      <div class="chatbot__header">
+        <strong>Buscador rápido</strong>
+        <button type="button" id="chatbotClose" class="chatbot__close">×</button>
+      </div>
+      <div id="chatbotMessages" class="chatbot__messages"></div>
+      <form id="chatbotForm" class="chatbot__form">
+        <input id="chatbotInput" type="text" placeholder="Escribe Panamá, Madrid, Río..." />
+        <button type="submit" class="button button--primary button--tiny">Buscar</button>
+      </form>
+    </div>
+  </section>
 
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -332,6 +539,8 @@
   <script src="./data.js" defer></script>
   <script src="./i18n.js" defer></script>
   <script src="./affiliate-links.js" defer></script>
+  <script src="./tabs.js" defer></script>
+  <script src="./map-widgets.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>
