@@ -2,6 +2,9 @@
 const travelData = window.TravelData || {};
 const travelAffiliateLinks = window.TravelAffiliateLinks || {};
 const travelI18n = window.TravelI18n || {};
+const travelTabs = window.TravelTabs || {};
+const travelMapWidgets = window.TravelMapWidgets || {};
+const travelConfig = window.TravelConfig || {};
 
 const {
   airportCatalog = {},
@@ -27,6 +30,31 @@ const LEGACY_STORAGE_KEYS = ["travel_site_packages_v3", "travel_site_packages_v2
 const SETTINGS_KEY = "travel_site_settings_v2";
 const ADMIN_PASSWORD = "1234";
 const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80";
+const COUNTRIES_API_URL = "https://restcountries.com/v3.1/all?fields=name,cca2,region,subregion,capital,latlng,flags,translations";
+const HOTEL_IMAGE_POOL = [
+  "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1501117716987-c8e1ecb210d2?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80"
+];
+const TIMEZONE_CITY_FALLBACKS = [
+  { match: "Montevideo", city: "Montevideo" },
+  { match: "Buenos_Aires", city: "Buenos Aires" },
+  { match: "Santiago", city: "Santiago" },
+  { match: "Asuncion", city: "Asunción" },
+  { match: "Sao_Paulo", city: "Sao Paulo" },
+  { match: "Rio", city: "Rio de Janeiro" },
+  { match: "New_York", city: "New York" },
+  { match: "Chicago", city: "Chicago" },
+  { match: "Denver", city: "Denver" },
+  { match: "Los_Angeles", city: "Los Angeles" },
+  { match: "Mexico_City", city: "Mexico City" },
+  { match: "Madrid", city: "Madrid" },
+  { match: "Lisbon", city: "Lisboa" },
+  { match: "Paris", city: "París" }
+];
+const BOOKING_PROXY_URL = typeof travelConfig.bookingProxyUrl === "string" ? travelConfig.bookingProxyUrl : "";
 
 const state = {
   packages: loadPackages(),
@@ -34,6 +62,9 @@ const state = {
   countries: normalizeCountries(countryCatalog),
   countryFilter: "All",
   countrySearch: "",
+  activeTab: "home",
+  hotelFocus: null,
+  countryLoadDone: false,
   adminUnlocked: false,
   editingId: null,
   editingImages: [],
@@ -43,7 +74,13 @@ const state = {
     packages: null,
     countries: null,
     routes: null
-  }
+  },
+  home: {
+    mode: "flight-hotel",
+    transport: false
+  },
+  bookingHotels: new Map(),
+  logEntries: []
 };
 
 const dom = {
@@ -61,6 +98,26 @@ const dom = {
   clearSearchButton: document.getElementById("clearSearchButton"),
   bookingShortcutButton: document.getElementById("bookingShortcutButton"),
   searchSummary: document.getElementById("searchSummary"),
+  homeCity: document.getElementById("homeCity"),
+  homeAdults: document.getElementById("homeAdults"),
+  homeChildren: document.getElementById("homeChildren"),
+  homeModeFlightHotel: document.getElementById("homeModeFlightHotel"),
+  homeModeHotelOnly: document.getElementById("homeModeHotelOnly"),
+  homeAirportTransport: document.getElementById("homeAirportTransport"),
+  homeOrigin: document.getElementById("homeOrigin"),
+  homeDepartureDate: document.getElementById("homeDepartureDate"),
+  homeReturnDate: document.getElementById("homeReturnDate"),
+  homeCheckin: document.getElementById("homeCheckin"),
+  homeCheckout: document.getElementById("homeCheckout"),
+  homeFlightsCount: document.getElementById("homeFlightsCount"),
+  homeFlightsGrid: document.getElementById("homeFlightsGrid"),
+  homeHotelsCount: document.getElementById("homeHotelsCount"),
+  homeHotelsSummary: document.getElementById("homeHotelsSummary"),
+  homeHotelsGrid: document.getElementById("homeHotelsGrid"),
+  homeTripMap: document.getElementById("homeTripMap"),
+  homeTripSummary: document.getElementById("homeTripSummary"),
+  homeFlightFields: document.querySelector("[data-home-flight-fields]"),
+  homeHotelFields: document.querySelector("[data-home-hotel-fields]"),
   miniBookingDestination: document.getElementById("miniBookingDestination"),
   miniBookingCountry: document.getElementById("miniBookingCountry"),
   miniBookingCheckin: document.getElementById("miniBookingCheckin"),
@@ -74,8 +131,12 @@ const dom = {
   miniBookingSummary: document.getElementById("miniBookingSummary"),
   miniBookingResults: document.getElementById("miniBookingResults"),
   bookingQuickGrid: document.getElementById("bookingQuickGrid"),
+  hotelSuggestionsSummary: document.getElementById("hotelSuggestionsSummary"),
+  hotelSuggestionsGrid: document.getElementById("hotelSuggestionsGrid"),
   resultsCount: document.getElementById("resultsCount"),
   packagesGrid: document.getElementById("packagesGrid"),
+  packagesMiniMap: document.getElementById("packagesMiniMap"),
+  hotelMiniMap: document.getElementById("hotelMiniMap"),
   mapSidebar: document.getElementById("mapSidebar"),
   exoticGrid: document.getElementById("exoticGrid"),
   tipsGrid: document.getElementById("tipsGrid"),
@@ -103,7 +164,17 @@ const dom = {
   imagePreview: document.getElementById("imagePreview"),
   adminList: document.getElementById("adminList"),
   modal: document.getElementById("modal"),
-  toast: document.getElementById("toast")
+  toast: document.getElementById("toast"),
+  travelCursor: document.getElementById("travelCursor"),
+  chatbot: document.getElementById("offerChatbot"),
+  chatbotToggle: document.getElementById("chatbotToggle"),
+  chatbotClose: document.getElementById("chatbotClose"),
+  chatbotMessages: document.getElementById("chatbotMessages"),
+  chatbotForm: document.getElementById("chatbotForm"),
+  chatbotInput: document.getElementById("chatbotInput"),
+  logFeed: document.getElementById("logFeed"),
+  logClearButton: document.getElementById("logClearButton"),
+  logStatus: document.getElementById("logStatus")
 };
 
 dom.childrenAgesField = dom.childrenAges?.closest(".field") || null;
@@ -303,6 +374,56 @@ function normalizeCountries(rawList) {
     })
     .filter(Boolean)
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function mergeCountryLists(primaryList, secondaryList) {
+  const map = new Map();
+  [...primaryList, ...secondaryList].forEach((entry) => {
+    const key = (entry.cca2 || entry.name || "").toUpperCase();
+    if (!key) return;
+    if (!map.has(key)) {
+      map.set(key, entry);
+      return;
+    }
+    const existing = map.get(key);
+    map.set(key, {
+      ...existing,
+      ...entry,
+      translations: {
+        ...(existing.translations || {}),
+        ...(entry.translations || {})
+      }
+    });
+  });
+  return Array.from(map.values());
+}
+
+async function loadGlobalCountries() {
+  try {
+    const response = await fetch(COUNTRIES_API_URL, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`Countries API status ${response.status}`);
+    const data = await response.json();
+    const remoteCountries = Array.isArray(data) ? data : [];
+    const normalized = normalizeCountries(mergeCountryLists(remoteCountries, countryCatalog));
+    if (normalized.length) {
+      state.countries = normalized;
+      state.countryLoadDone = true;
+      renderSuggestions();
+      renderCountryFilters();
+      renderCountries();
+      renderMap();
+      return;
+    }
+  } catch (error) {
+    console.warn("Countries API fallback", error);
+  }
+
+  state.countries = normalizeCountries(countryCatalog);
+  state.countryLoadDone = true;
+  renderSuggestions();
+  renderCountryFilters();
+  renderCountries();
+  renderMap();
 }
 
 function getTranslation(key) {
@@ -560,6 +681,8 @@ function buildMiniBookingItems() {
   const search = getMiniBookingState();
   const destinationText = [search.destination, search.country].filter(Boolean).join(", ");
   renderBookingQuickGrid(search);
+  renderHotelMiniMap();
+  buildHotelSuggestions();
 
   if (!destinationText) {
     dom.miniBookingSummary.textContent = getTranslation("mini_booking_incomplete_summary");
@@ -647,6 +770,14 @@ function buildMiniBookingItems() {
         <h3>${referralProviders[entry.provider]?.label || entry.provider}</h3>
         <div class="card-meta">${inspection.hostname}${inspection.pathname}</div>
         <span class="link-hint">${url || "Completa check-in y check-out para este proveedor."}</span>
+        <div class="mini-map-badge">
+          ${travelMapWidgets.buildMiniMapBadge({
+            title: destinationText,
+            origin: search.country || "Hotel",
+            destination: entry.provider,
+            mode: "hotel"
+          })}
+        </div>
         <div class="provider-card__actions">
           <a class="button ${isPrimary ? "button--primary" : "button--secondary"} button--tiny ${url ? "" : "is-disabled"}" href="${url || "#"}" target="_blank" rel="noreferrer">${getTranslation("mini_booking_open")}</a>
           <button class="button button--secondary button--tiny" type="button" data-mini-inspect='${JSON.stringify(inspection).replace(/'/g, "&apos;")}'>${getTranslation("mini_booking_inspect")}</button>
@@ -654,6 +785,7 @@ function buildMiniBookingItems() {
       </article>
     `;
   }).join("");
+  renderHotelMiniMap();
 }
 
 function renderBookingQuickGrid(search) {
@@ -680,6 +812,14 @@ function renderBookingQuickGrid(search) {
         <div class="card-visual">
           <img src="${entry.image}" alt="${destinationText}" />
           <div class="card-badge">Booking</div>
+          <div class="mini-map-badge">
+            ${travelMapWidgets.buildMiniMapBadge({
+              title: entry.city,
+              origin: entry.country,
+              destination: entry.region,
+              mode: "hotel"
+            })}
+          </div>
         </div>
         <h3>${entry.city}</h3>
         <div class="card-meta">${entry.region} · ${entry.country}</div>
@@ -693,6 +833,817 @@ function renderBookingQuickGrid(search) {
   }).join("");
 }
 
+function getPackageMiniPoints(list) {
+  return list
+    .map((item) => {
+      const coords = resolvePackageCoords(item);
+      if (!coords) return null;
+      const [lat, lng] = coords;
+      return {
+        lat,
+        lng,
+        label: `${item.city || item.title}`,
+        color: item.type === "Crucero" ? "#1a7c64" : "#14556b"
+      };
+    })
+    .filter(Boolean);
+}
+
+function renderPackagesMiniMap() {
+  if (!dom.packagesMiniMap || !travelMapWidgets.renderMiniMap) return;
+  const points = getPackageMiniPoints(state.filteredPackages.length ? state.filteredPackages : state.packages);
+  travelMapWidgets.renderMiniMap("packagesMiniMap", {
+    points,
+    center: points[0] ? [points[0].lat, points[0].lng] : [16, 0],
+    zoom: points.length === 1 ? 5 : 2,
+    showRoutes: false
+  });
+}
+
+function findHotelCityMatch(query) {
+  const text = normalizeText(query);
+  if (!text) return null;
+  return hotelCityCatalog.find((city) => normalizeText([city.city, city.country].join(" ")).includes(text))
+    || countryCatalog.find((country) => normalizeText(country.name).includes(text));
+}
+
+function renderHotelMiniMap() {
+  if (!dom.hotelMiniMap || !travelMapWidgets.renderMiniMap) return;
+  const query = dom.miniBookingDestination?.value?.trim() || dom.miniBookingCountry?.value?.trim() || "";
+  const city = findHotelCityMatch(query);
+  const partyType = getPartyIconType(dom.miniBookingAdults?.value, dom.miniBookingChildren?.value);
+  const points = [];
+
+  if (city && Number.isFinite(city.lat) && Number.isFinite(city.lng)) {
+    points.push({
+      lat: city.lat,
+      lng: city.lng,
+      label: `${city.city}, ${city.country}`,
+      color: "#dd7046",
+      iconType: partyType
+    });
+  }
+
+  if (!points.length) {
+    hotelCityCatalog.slice(0, 4).forEach((entry, index) => {
+      points.push({
+        lat: entry.lat,
+        lng: entry.lng,
+        label: `${entry.city}, ${entry.country}`,
+        color: index % 2 === 0 ? "#14556b" : "#1a7c64"
+      });
+    });
+  }
+
+  travelMapWidgets.renderMiniMap("hotelMiniMap", {
+    points,
+    center: points[0] ? [points[0].lat, points[0].lng] : [-15, -20],
+    zoom: points.length === 1 ? 6 : 2,
+    showRoutes: false
+  });
+}
+
+function findCatalogCityMatch(query) {
+  const text = normalizeText(query);
+  if (!text) return null;
+  return hotelCityCatalog.find((city) => normalizeText([city.city, city.country].join(" ")).includes(text))
+    || state.countries.find((country) => normalizeText([country.name, getLocalizedCountryName(country), ...(country.capital || [])].join(" ")).includes(text))
+    || null;
+}
+
+function resolveHotelPriceLabel(item, cityLabel, index = 0) {
+  if (item?.finalPrice || item?.basePrice) {
+    return {
+      nightly: item.basePrice || item.finalPrice,
+      total: item.finalPrice || item.basePrice
+    };
+  }
+  return formatHotelPrice(cityLabel || item?.city || "Destino", index);
+}
+
+function buildHotelListingCards(query, context = {}) {
+  const cityEntry = context.cityEntry || findCatalogCityMatch(query);
+  const queryText = normalizeText(query);
+  const cityLabel = cityEntry?.city || context.cityLabel || query || "";
+  const countryLabel = cityEntry?.country || context.countryLabel || "";
+  const activeSearch = {
+    startDate: context.checkin || "",
+    endDate: context.checkout || "",
+    adults: Number(context.adults || 2),
+    children: Number(context.children || 0),
+    rooms: Number(context.rooms || 1)
+  };
+
+  const packageHotels = state.packages
+    .filter((item) => normalizeText(item.type) === "hotel" || normalizeText(item.referral?.kind) === "hotel")
+    .filter((item) => {
+      if (!queryText) return Boolean(cityLabel);
+      return normalizeText([
+        item.title,
+        item.city,
+        item.country,
+        item.region,
+        item.hotelName,
+        item.summary
+      ].join(" ")).includes(queryText);
+    })
+    .map((item, index) => ({
+      key: item.id,
+      title: item.title,
+      city: item.city || cityLabel,
+      country: item.country || countryLabel,
+      neighborhood: item.region || cityEntry?.airport || "Ubicación destacada",
+      summary: item.summary || `Hotel en ${item.city || cityLabel}.`,
+      images: item.images.length ? item.images : buildHotelImageSet(cityLabel || item.city || query || "Destino", index),
+      price: resolveHotelPriceLabel(item, cityLabel, index),
+      link: buildAffiliateLink(item, activeSearch),
+      provider: referralProviders[item.referral?.provider]?.label || item.referral?.provider || "Hotel",
+      mode: "package"
+    }));
+
+  const quickHotels = bookingQuickHotels
+    .filter((entry) => !queryText || normalizeText([entry.city, entry.country, entry.region, entry.summary].join(" ")).includes(queryText))
+    .map((entry, index) => ({
+      key: entry.id,
+      title: `${entry.city} ${entry.region}`,
+      city: entry.city,
+      country: entry.country,
+      neighborhood: entry.region,
+      summary: entry.summary,
+      images: [entry.image, ...buildHotelImageSet(entry.city, index + 1)].slice(0, 3),
+      price: formatHotelPrice(entry.city, index),
+      link: buildBookingSearchUrl({
+        destinationText: `${entry.city}, ${entry.country}`,
+        destinationId: entry.destinationId || "",
+        checkin: activeSearch.startDate,
+        checkout: activeSearch.endDate,
+        adults: activeSearch.adults,
+        children: activeSearch.children,
+        rooms: activeSearch.rooms
+      }),
+      provider: "Booking",
+      mode: "booking"
+    }));
+
+  return [...packageHotels, ...quickHotels].slice(0, 10);
+}
+
+function renderHotelListingCards(container, items, { emptyText = "No hay resultados.", badgeIconType = "" } = {}) {
+  if (!container) return "";
+  if (!items.length) {
+    container.innerHTML = `<div class="empty-state">${emptyText}</div>`;
+    return "";
+  }
+
+  container.innerHTML = items.map((hotel) => `
+    <article class="hotel-card hotel-card--listing">
+      <div class="hotel-card__carousel image-carousel" data-image-carousel data-index="0" data-images="${encodeImageList(hotel.images)}">
+        <img src="${hotel.images[0]}" alt="${hotel.title}" data-carousel-image />
+        <div class="hotel-card__badge">${hotel.provider}</div>
+        <div class="hotel-card__nav">
+          <button type="button" data-carousel-prev aria-label="Imagen anterior">‹</button>
+          <button type="button" data-carousel-next aria-label="Imagen siguiente">›</button>
+        </div>
+      </div>
+      <div class="hotel-card__body">
+        <div class="card-meta">${hotel.neighborhood}</div>
+        <h3>${hotel.title}</h3>
+        <p class="card-copy">${hotel.summary}</p>
+        <div class="hotel-card__price">
+          <span>Noche desde</span>
+          <strong>${hotel.price.nightly}</strong>
+        </div>
+        <div class="hotel-card__price">
+          <span>Total estimado</span>
+          <strong>${hotel.price.total}</strong>
+        </div>
+        <div class="mini-map-badge">
+          ${travelMapWidgets.buildMiniMapBadge({
+            title: hotel.city,
+            origin: hotel.country || "Hotel",
+            destination: hotel.neighborhood,
+            mode: "hotel",
+            partyType: badgeIconType
+          })}
+        </div>
+        <div class="provider-card__actions">
+          <a class="button button--primary button--tiny" href="${hotel.link}" target="_blank" rel="noreferrer">Ver hotel</a>
+        </div>
+      </div>
+    </article>
+  `).join("");
+
+  return container.innerHTML;
+}
+
+function renderHomeModeVisibility() {
+  const hotelFlow = state.home.mode === "hotel-only" || state.home.transport;
+  dom.homeFlightFields?.classList.toggle("is-hidden", hotelFlow);
+  dom.homeHotelFields?.classList.toggle("is-hidden", !hotelFlow);
+}
+
+function getHomeSearchState() {
+  return {
+    city: dom.homeCity?.value.trim() || "",
+    adults: Number(dom.homeAdults?.value || 2),
+    children: Number(dom.homeChildren?.value || 0),
+    mode: dom.homeModeHotelOnly?.checked ? "hotel-only" : "flight-hotel",
+    transport: Boolean(dom.homeAirportTransport?.checked),
+    origin: dom.homeOrigin?.value.trim() || "",
+    departureDate: dom.homeDepartureDate?.value || "",
+    returnDate: dom.homeReturnDate?.value || "",
+    checkin: dom.homeCheckin?.value || "",
+    checkout: dom.homeCheckout?.value || ""
+  };
+}
+
+function collectFlightSuggestions(query, context) {
+  const queryText = normalizeText(query);
+  const activeSearch = {
+    startDate: context.departureDate || context.checkin || "",
+    endDate: context.returnDate || context.checkout || "",
+    adults: context.adults || 2,
+    children: context.children || 0
+  };
+
+  const flights = state.packages
+    .filter((item) => ["pasaje", "vuelo", "flight"].includes(normalizeText(item.type)) || normalizeText(item.summary).includes("vuelo"))
+    .filter((item) => {
+      if (!queryText) return true;
+      return normalizeText([
+        item.title,
+        item.city,
+        item.country,
+        item.summary,
+        item.originCity,
+        item.originCountry,
+        item.destinationCode
+      ].join(" ")).includes(queryText);
+    })
+    .slice(0, 4);
+
+  const sourceFlights = flights.length ? flights : state.packages.filter((item) => normalizeText(item.type) === "pasaje").slice(0, 4);
+
+  return sourceFlights.map((item) => ({
+    key: item.id,
+    title: item.title,
+    route: `${item.originCity || item.originCode || "Origen"} → ${item.city || item.destinationCode || "Destino"}`,
+    city: item.city,
+    country: item.country,
+    summary: item.summary || "Vuelo listo para abrir.",
+    image: item.images[0] || PLACEHOLDER_IMAGE,
+    price: item.finalPrice || item.basePrice || "Precio a definir",
+    link: buildAffiliateLink(item, activeSearch),
+    scales: item.scales || [],
+    item
+  }));
+}
+
+function renderHomeWorkbench() {
+  const context = getHomeSearchState();
+  state.home.mode = context.mode;
+  state.home.transport = context.transport;
+  renderHomeModeVisibility();
+  const partyType = getPartyIconType(context.adults, context.children);
+
+  if (!context.city) {
+    if (dom.homeFlightsCount) dom.homeFlightsCount.textContent = "0";
+    if (dom.homeHotelsCount) dom.homeHotelsCount.textContent = "0";
+    if (dom.homeHotelsSummary) {
+      dom.homeHotelsSummary.textContent = "Escribe una ciudad y al salir del campo cargamos hoteles.";
+    }
+    if (dom.homeFlightsGrid) {
+      dom.homeFlightsGrid.innerHTML = `<div class="empty-state">Escribe una ciudad para ver vuelos.</div>`;
+    }
+    if (dom.homeHotelsGrid) {
+      dom.homeHotelsGrid.innerHTML = `<div class="empty-state">Escribe una ciudad para ver hoteles.</div>`;
+    }
+    if (dom.homeTripSummary) {
+      dom.homeTripSummary.textContent = "Escribe una ciudad y al salir del campo cargamos vuelos, hoteles y mapa.";
+    }
+    if (dom.homeTripMap) {
+      travelMapWidgets.renderMiniMap("homeTripMap", {
+        points: [],
+        center: [16, 0],
+        zoom: 2,
+        showRoutes: false
+      });
+    }
+    return;
+  }
+
+  const cityEntry = findCatalogCityMatch(context.city);
+  const hotelCards = buildHotelListingCards(context.city, {
+    cityEntry,
+    cityLabel: cityEntry?.city || context.city,
+    countryLabel: cityEntry?.country || "",
+    adults: context.adults,
+    children: context.children,
+    rooms: context.transport ? 1 : 1,
+    checkin: context.transport || context.mode === "hotel-only" ? context.checkin : context.departureDate,
+    checkout: context.transport || context.mode === "hotel-only" ? context.checkout : context.returnDate
+  });
+  const flightCards = context.mode === "flight-hotel" && !context.transport ? collectFlightSuggestions(context.city, context) : [];
+  const badgeIconType = partyType;
+  pushLog("Home ciudad lista", `${cityEntry?.city || context.city}${cityEntry?.country ? `, ${cityEntry.country}` : ""}`);
+
+  if (dom.homeFlightsCount) dom.homeFlightsCount.textContent = String(flightCards.length);
+  if (dom.homeHotelsCount) dom.homeHotelsCount.textContent = String(hotelCards.length);
+  if (dom.homeHotelsSummary) {
+    dom.homeHotelsSummary.textContent = `Mostrando ${hotelCards.length} hoteles para ${cityEntry?.city || context.city}${cityEntry?.country ? `, ${cityEntry.country}` : ""}.`;
+  }
+  if (dom.homeTripSummary) {
+    dom.homeTripSummary.textContent = context.city
+      ? `${context.city}${cityEntry?.country ? `, ${cityEntry.country}` : ""} · ${context.mode === "flight-hotel" ? "vuelo + hotel" : "solo hotel"}${context.transport ? " · transporte desde el aeropuerto" : ""}`
+      : "Escribe una ciudad para ver vuelos, hoteles y mapa.";
+  }
+
+  renderHotelListingCards(dom.homeHotelsGrid, hotelCards, {
+    emptyText: "Escribe una ciudad y sal del campo para ver hoteles.",
+    badgeIconType
+  });
+
+  void fetchBookingHotelSuggestions({
+    query: context.city,
+    cityEntry,
+    cityLabel: cityEntry?.city || context.city,
+    countryLabel: cityEntry?.country || "",
+    checkin: context.transport || context.mode === "hotel-only" ? context.checkin : context.departureDate,
+    checkout: context.transport || context.mode === "hotel-only" ? context.checkout : context.returnDate,
+    adults: context.adults,
+    children: context.children,
+    rooms: 1
+  }).then((bookingHotels) => {
+    if (!bookingHotels.length || dom.homeCity?.value.trim() !== context.city) return;
+    const bookingCards = bookingHotels.map((hotel, index) => ({
+      key: `home-booking-${index}-${hotel.title}`,
+      title: hotel.title,
+      city: cityEntry?.city || context.city,
+      country: cityEntry?.country || "",
+      neighborhood: hotel.area || "Booking",
+      summary: hotel.rating ? `Rating ${hotel.rating} · ${hotel.area || "Booking"}` : hotel.area || "Hotel encontrado en Booking.",
+      images: hotel.image ? [hotel.image, ...buildHotelImageSet(cityEntry?.city || context.city || "Destino", index)].slice(0, 3) : buildHotelImageSet(cityEntry?.city || context.city || "Destino", index),
+      price: {
+        nightly: hotel.price || "Precio Booking",
+        total: hotel.price || "Precio Booking"
+      },
+      link: hotel.url || "#",
+      provider: "Booking",
+      mode: "booking"
+    }));
+    renderHotelListingCards(dom.homeHotelsGrid, [...bookingCards, ...hotelCards].slice(0, 10), {
+      emptyText: "Escribe una ciudad y sal del campo para ver hoteles.",
+      badgeIconType
+    });
+    pushLog("Home Booking listo", `${bookingCards.length} resultados`);
+  });
+
+  if (dom.homeFlightsGrid) {
+    if (!flightCards.length) {
+      dom.homeFlightsGrid.innerHTML = context.mode === "flight-hotel"
+        ? `<div class="empty-state">Todavía no hay vuelos para este destino.</div>`
+        : `<div class="empty-state">Elegiste solo hotel, por eso los vuelos quedan ocultos.</div>`;
+    } else {
+      dom.homeFlightsGrid.innerHTML = flightCards.map((flight) => `
+        <article class="flight-card">
+          <div class="card-visual flight-card__visual">
+            <img src="${flight.image}" alt="${flight.title}" />
+            <div class="card-badge">Vuelo</div>
+            <div class="mini-map-badge">
+              ${travelMapWidgets.buildMiniMapBadge({
+                title: flight.route,
+                origin: flight.item.originCity || flight.item.originCode || "Origen",
+                destination: flight.city || flight.item.destinationCode || "Destino",
+                mode: "package",
+                iconType: "plane"
+              })}
+            </div>
+          </div>
+          <div class="provider-card__body">
+            <div class="card-meta">${flight.route}</div>
+            <h3>${flight.title}</h3>
+            <p class="card-copy">${flight.summary}</p>
+            <div class="package-price"><span>Precio</span><strong>${flight.price}</strong></div>
+            <div class="provider-card__actions">
+              <a class="button button--primary button--tiny" href="${flight.link}" target="_blank" rel="noreferrer">Abrir vuelo</a>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+  }
+
+  if (dom.homeTripMap) {
+    const points = [];
+    if (context.mode === "hotel-only" || context.transport) {
+      if (cityEntry?.lat && cityEntry?.lng) {
+        points.push({
+          lat: cityEntry.lat,
+          lng: cityEntry.lng,
+          label: `${cityEntry.city}, ${cityEntry.country}`,
+          color: "#dd7046",
+          iconType: partyType
+        });
+      }
+    } else {
+      const sourceFlight = flightCards[0]?.item || null;
+      if (sourceFlight) {
+        const routePoints = resolveRoutePoints(sourceFlight);
+        routePoints.forEach((point, index) => {
+          points.push({
+            lat: point[0],
+            lng: point[1],
+            label: index === 0 ? `${sourceFlight.originCity || sourceFlight.originCode || "Origen"}` : index === routePoints.length - 1 ? `${sourceFlight.city || sourceFlight.destinationCode || "Destino"}` : `Escala ${index}`,
+            color: index === 0 ? "#1a7c64" : index === routePoints.length - 1 ? "#dd7046" : "#14556b"
+          });
+        });
+        if (routePoints.length >= 2) {
+          const first = routePoints[0];
+          const last = routePoints[routePoints.length - 1];
+          points.push({
+            lat: (first[0] + last[0]) / 2,
+            lng: (first[1] + last[1]) / 2,
+            label: "Avión en ruta",
+            color: "#dd7046",
+            iconType: "plane"
+          });
+        }
+      } else {
+        const originAirport = airportCatalog[context.origin?.toUpperCase?.() || ""];
+        const originEntry = findCatalogCityMatch(context.origin);
+        if (originAirport) {
+          points.push({
+            lat: originAirport.lat,
+            lng: originAirport.lng,
+            label: `${originAirport.city}, ${originAirport.country}`,
+            color: "#1a7c64"
+          });
+        } else if (originEntry?.lat && originEntry?.lng) {
+          points.push({
+            lat: originEntry.lat,
+            lng: originEntry.lng,
+            label: `${originEntry.city}, ${originEntry.country}`,
+            color: "#1a7c64"
+          });
+        }
+        if (cityEntry?.lat && cityEntry?.lng) {
+          points.push({
+            lat: cityEntry.lat,
+            lng: cityEntry.lng,
+            label: `${cityEntry.city}, ${cityEntry.country}`,
+            color: "#dd7046",
+            iconType: "plane"
+          });
+        }
+      }
+    }
+
+    travelMapWidgets.renderMiniMap("homeTripMap", {
+      points,
+      center: points[0] ? [points[0].lat, points[0].lng] : [16, 0],
+      zoom: points.length === 1 ? 5 : 3,
+      showRoutes: true
+    });
+  }
+}
+
+function hashText(text) {
+  return normalizeText(text)
+    .split("")
+    .reduce((acc, char) => ((acc << 5) - acc) + char.charCodeAt(0), 0);
+}
+
+function buildHotelImageSet(cityLabel, index) {
+  const seed = Math.abs(hashText(`${cityLabel}-${index}`));
+  return HOTEL_IMAGE_POOL.slice(0, 3).map((url, imageIndex) => `${url}&sig=${seed + imageIndex * 11}`);
+}
+
+function formatHotelPrice(baseCity, index) {
+  const citySeed = Math.abs(hashText(baseCity));
+  const nightly = 68 + ((citySeed % 7) * 14) + (index * 11);
+  const total = nightly * 3;
+  return {
+    nightly: `USD ${nightly}`,
+    total: `USD ${total}`
+  };
+}
+
+function getPartyIconType(adults = 2, children = 0) {
+  const adultCount = Number(adults || 0);
+  const childCount = Number(children || 0);
+  if (childCount > 0 || adultCount > 2) return "family";
+  if (adultCount === 2) return "couple";
+  return "single";
+}
+
+function getDefaultOriginCity() {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+  const hit = TIMEZONE_CITY_FALLBACKS.find((entry) => timezone.includes(entry.match));
+  return hit?.city || "Montevideo";
+}
+
+async function resolveCityFromCoordinates(lat, lng) {
+  try {
+    const url = new URL("https://nominatim.openstreetmap.org/reverse");
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("lat", String(lat));
+    url.searchParams.set("lon", String(lng));
+    url.searchParams.set("zoom", "10");
+    url.searchParams.set("addressdetails", "1");
+    const response = await fetch(url.toString(), {
+      headers: {
+        Accept: "application/json"
+      }
+    });
+    if (!response.ok) return "";
+    const data = await response.json();
+    return data?.address?.city || data?.address?.town || data?.address?.village || data?.address?.municipality || data?.address?.county || "";
+  } catch (error) {
+    return "";
+  }
+}
+
+async function prefillHomeOrigin() {
+  if (!dom.homeOrigin || dom.homeOrigin.value.trim()) return;
+
+  const applyValue = (value) => {
+    if (!value || dom.homeOrigin.value.trim()) return;
+    dom.homeOrigin.value = value;
+    renderHomeWorkbench();
+  };
+
+  if (!navigator.geolocation) {
+    applyValue(getDefaultOriginCity());
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const city = await resolveCityFromCoordinates(position.coords.latitude, position.coords.longitude);
+    applyValue(city || getDefaultOriginCity());
+  }, () => {
+    applyValue(getDefaultOriginCity());
+  }, {
+    enableHighAccuracy: false,
+    timeout: 3000,
+    maximumAge: 86400000
+  });
+}
+
+function resolveHotelSearchContext() {
+  const destination = dom.miniBookingDestination.value.trim();
+  const country = dom.miniBookingCountry.value.trim();
+  const query = destination || country;
+  const cityEntry = findHotelCityMatch(query);
+  const cityLabel = cityEntry?.city || destination || country || "";
+  const countryLabel = cityEntry?.country || country || "";
+  return {
+    query,
+    cityEntry,
+    cityLabel,
+    countryLabel
+  };
+}
+
+async function fetchBookingHotelSuggestions(search) {
+  const key = [
+    search.query,
+    search.cityEntry?.city || "",
+    search.cityEntry?.country || "",
+    search.checkin || "",
+    search.checkout || "",
+    search.adults || 2,
+    search.children || 0,
+    search.rooms || 1
+  ].join("|");
+  if (state.bookingHotels.has(key)) return state.bookingHotels.get(key);
+  if (!BOOKING_PROXY_URL) {
+    state.bookingHotels.set(key, []);
+    return [];
+  }
+
+  try {
+    pushLog("Blur detectado, consultando Booking", search.query || search.cityEntry?.city || "");
+    const params = new URLSearchParams();
+    if (search.cityEntry?.city || search.query) params.set("destination", search.cityEntry?.city || search.query);
+    if (search.cityEntry?.country) params.set("country", search.cityEntry.country);
+    if (search.checkin) params.set("checkin", search.checkin);
+    if (search.checkout) params.set("checkout", search.checkout);
+    params.set("adults", String(search.adults || 2));
+    params.set("children", String(search.children || 0));
+    params.set("rooms", String(search.rooms || 1));
+    if (search.cityEntry?.bookingDestId) params.set("destId", search.cityEntry.bookingDestId);
+    const response = await fetch(`${BOOKING_PROXY_URL}?${params.toString()}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const hotels = Array.isArray(data?.hotels) ? data.hotels : [];
+    state.bookingHotels.set(key, hotels);
+    pushLog(hotels.length ? "Booking devolvió hoteles" : "Booking sin resultados", `${hotels.length} resultados`);
+    // eslint-disable-next-line no-console
+    console.log("[travel-site] booking-hotels", {
+      query: search.query,
+      city: search.cityEntry?.city || search.query || "",
+      country: search.cityEntry?.country || "",
+      fetched: Boolean(data?.fetched),
+      count: hotels.length,
+      source: data?.source || "booking"
+    });
+    return hotels;
+  } catch (error) {
+    pushLog("Error en Booking, sin datos remotos", String(error?.message || error));
+    // eslint-disable-next-line no-console
+    console.log("[travel-site] booking-hotels-error", {
+      query: search.query,
+      city: search.cityEntry?.city || search.query || "",
+      error: String(error?.message || error)
+    });
+    state.bookingHotels.set(key, []);
+    return [];
+  }
+}
+
+async function buildHotelSuggestions() {
+  if (!dom.hotelSuggestionsGrid || !dom.hotelSuggestionsSummary) return;
+  const { query, cityEntry, cityLabel, countryLabel } = resolveHotelSearchContext();
+  const badgeIconType = getPartyIconType(dom.miniBookingAdults?.value, dom.miniBookingChildren?.value);
+  let hotelCards = buildHotelListingCards(query, {
+    cityEntry,
+    cityLabel,
+    countryLabel,
+    adults: Number(dom.miniBookingAdults.value || 2),
+    children: Number(dom.miniBookingChildren.value || 0),
+    rooms: Number(dom.miniBookingRooms.value || 1),
+    checkin: dom.miniBookingCheckin.value,
+    checkout: dom.miniBookingCheckout.value
+  });
+
+  if (!query) {
+    pushLog("Blur sin ciudad", "No se disparó búsqueda");
+    dom.hotelSuggestionsSummary.textContent = "Selecciona una ciudad y al salir del campo cargaremos 10 hoteles.";
+    dom.hotelSuggestionsGrid.innerHTML = `<div class="empty-state">Escribe una ciudad para ver hoteles sugeridos.</div>`;
+    return;
+  }
+
+  pushLog("Ciudad destino lista", `${cityLabel || query}${countryLabel ? `, ${countryLabel}` : ""}`);
+  dom.hotelSuggestionsSummary.textContent = `Buscando hoteles para ${cityLabel || query}${countryLabel ? `, ${countryLabel}` : ""}...`;
+  renderHotelListingCards(dom.hotelSuggestionsGrid, hotelCards, {
+    emptyText: "No hay hoteles sugeridos para este destino.",
+    badgeIconType
+  });
+
+  const bookingHotels = await fetchBookingHotelSuggestions({
+    query,
+    cityEntry,
+    cityLabel,
+    countryLabel,
+    checkin: dom.miniBookingCheckin.value,
+    checkout: dom.miniBookingCheckout.value,
+    adults: Number(dom.miniBookingAdults.value || 2),
+    children: Number(dom.miniBookingChildren.value || 0),
+    rooms: Number(dom.miniBookingRooms.value || 1)
+  });
+
+  if (bookingHotels.length) {
+    const bookingCards = bookingHotels.map((hotel, index) => ({
+      key: `booking-${index}-${hotel.title}`,
+      title: hotel.title,
+      city: cityLabel || query,
+      country: countryLabel,
+      neighborhood: hotel.area || "Booking",
+      summary: hotel.rating ? `Rating ${hotel.rating} · ${hotel.area || "Booking"}` : hotel.area || "Hotel encontrado en Booking.",
+      images: hotel.image ? [hotel.image, ...buildHotelImageSet(cityLabel || query || "Destino", index)].slice(0, 3) : buildHotelImageSet(cityLabel || query || "Destino", index),
+      price: {
+        nightly: hotel.price || "Precio Booking",
+        total: hotel.price || "Precio Booking"
+      },
+      link: hotel.url || "#",
+      provider: "Booking",
+      mode: "booking"
+    }));
+    hotelCards = [...bookingCards, ...hotelCards].slice(0, 10);
+  } else if (!hotelCards.length) {
+    dom.hotelSuggestionsSummary.textContent = `No hay hoteles locales para ${cityLabel || query}${countryLabel ? `, ${countryLabel}` : ""}.`;
+    renderHotelListingCards(dom.hotelSuggestionsGrid, [], {
+      emptyText: "No hay hoteles sugeridos para este destino.",
+      badgeIconType
+    });
+    return;
+  }
+
+  if (!bookingHotels.length && hotelCards.length) {
+    dom.hotelSuggestionsSummary.textContent = `Mostrando ${hotelCards.length} hoteles locales para ${cityLabel || query}${countryLabel ? `, ${countryLabel}` : ""}.`;
+    renderHotelListingCards(dom.hotelSuggestionsGrid, hotelCards, {
+      emptyText: "No hay hoteles sugeridos para este destino.",
+      badgeIconType
+    });
+    return;
+  }
+
+  // eslint-disable-next-line no-console
+  console.log("[travel-site] hotel-suggestions-render", {
+    query,
+    city: cityLabel || query,
+    country: countryLabel,
+    cards: hotelCards.length,
+    bookingCards: bookingHotels.length
+  });
+
+  dom.hotelSuggestionsSummary.textContent = `Mostrando ${hotelCards.length} hoteles para ${cityLabel || query}${countryLabel ? `, ${countryLabel}` : ""}.`;
+  renderHotelListingCards(dom.hotelSuggestionsGrid, hotelCards, {
+    emptyText: "No hay hoteles sugeridos para este destino.",
+    badgeIconType
+  });
+}
+
+function searchOfferByQuery(query) {
+  const normalized = normalizeText(query);
+  if (!normalized) return null;
+  return state.packages.find((item) => normalizeText([
+    item.title,
+    item.city,
+    item.country,
+    item.summary,
+    item.themeTag,
+    ...(item.highlights || [])
+  ].join(" ")).includes(normalized)) || null;
+}
+
+function renderChatbot() {
+  if (!dom.chatbotMessages) return;
+  dom.chatbotMessages.innerHTML = `
+    <div class="chatbot__bubble chatbot__bubble--bot">Escribe una ciudad o país. Si hay una promo cargada, te la muestro enseguida.</div>
+  `;
+}
+
+function appendChatbotMessage(text, kind = "bot") {
+  if (!dom.chatbotMessages) return;
+  const bubble = document.createElement("div");
+  bubble.className = `chatbot__bubble chatbot__bubble--${kind}`;
+  bubble.textContent = text;
+  dom.chatbotMessages.appendChild(bubble);
+  dom.chatbotMessages.scrollTop = dom.chatbotMessages.scrollHeight;
+}
+
+function renderOfferResultCard(item, query) {
+  if (!dom.chatbotMessages) return;
+  const resolvedLink = buildAffiliateLink(item, getSearchState());
+  const result = document.createElement("div");
+  result.className = "chatbot__bubble chatbot__bubble--bot chatbot__result";
+  result.innerHTML = `
+    <strong>Encontré esta oferta para ti</strong>
+    <span>${item.title}</span>
+    <span>${item.city}, ${item.country} · ${item.finalPrice || item.basePrice || "-"}</span>
+    <span>${item.summary || "Sin descripción."}</span>
+    <a class="button button--primary button--tiny chatbot__result-link" href="${resolvedLink}" target="_blank" rel="noreferrer">Abrir oferta</a>
+  `;
+  dom.chatbotMessages.appendChild(result);
+  dom.chatbotMessages.scrollTop = dom.chatbotMessages.scrollHeight;
+}
+
+function handleChatbotSearch(rawQuery) {
+  const query = rawQuery.trim();
+  if (!query) return;
+  appendChatbotMessage(query, "user");
+  const offer = searchOfferByQuery(query);
+  if (offer) {
+    renderOfferResultCard(offer, query);
+  } else {
+    appendChatbotMessage("No encontré una promo cargada para esa búsqueda.", "bot");
+  }
+}
+
+function renderPackageDetailMap(item) {
+  const container = document.getElementById("packageDetailMap");
+  if (!container || !travelMapWidgets.renderMiniMap) return;
+  const origin = item.originCode && airportCatalog[item.originCode] ? airportCatalog[item.originCode] : null;
+  const destination = resolvePackageCoords(item);
+  const points = [];
+
+  if (origin) {
+    points.push({
+      lat: origin.lat,
+      lng: origin.lng,
+      label: `${origin.city}, ${origin.country}`,
+      color: "#1a7c64"
+    });
+  }
+
+  if (destination) {
+    points.push({
+      lat: destination[0],
+      lng: destination[1],
+      label: `${item.city}, ${item.country}`,
+      color: "#dd7046"
+    });
+  }
+
+  travelMapWidgets.renderMiniMap("packageDetailMap", {
+    points,
+    center: points[0] ? [points[0].lat, points[0].lng] : [16, 0],
+    zoom: points.length === 1 ? 5 : 3,
+    showRoutes: true
+  });
+}
+
 function renderPackages() {
   const filters = getSearchState();
   if (!Array.isArray(state.packages) || !state.packages.length) {
@@ -700,12 +1651,13 @@ function renderPackages() {
     savePackages();
   }
   state.filteredPackages = state.packages.filter((item) => packageMatchesFilters(item, filters));
-  dom.heroPackagesCount.textContent = String(state.packages.length);
+  if (dom.heroPackagesCount) dom.heroPackagesCount.textContent = String(state.packages.length);
   dom.resultsCount.textContent = String(state.filteredPackages.length);
   dom.searchSummary.textContent = buildSearchSummary(filters);
 
   if (!state.filteredPackages.length) {
     dom.packagesGrid.innerHTML = `<div class="empty-state">${getTranslation("fallback_no_results")}</div>`;
+    renderPackagesMiniMap();
     return;
   }
 
@@ -731,6 +1683,14 @@ function renderPackages() {
             <div class="carousel-counter" data-carousel-counter>1 / ${images.length}</div>
           ` : ""}
           <div class="card-badge">${item.type}</div>
+          <div class="mini-map-badge">
+            ${travelMapWidgets.buildMiniMapBadge({
+              title: item.city || item.title,
+              origin: item.originCity || item.originCode || "Origen",
+              destination: item.destinationCode || item.city || "Destino",
+              mode: "package"
+            })}
+          </div>
         </div>
         <div class="package-card__body">
           <div class="package-route">${routeLabel}</div>
@@ -759,6 +1719,7 @@ function renderPackages() {
       </article>
     `;
   }).join("");
+  renderPackagesMiniMap();
 }
 
 function renderEditorial() {
@@ -809,7 +1770,7 @@ function getFilteredCountries() {
 
 function renderCountries() {
   const list = getFilteredCountries();
-  dom.heroCountriesCount.textContent = String(state.countries.length);
+  if (dom.heroCountriesCount) dom.heroCountriesCount.textContent = String(state.countries.length);
 
   if (!list.length) {
     dom.countriesGrid.innerHTML = `<div class="empty-state">${getTranslation("fallback_no_countries")}</div>`;
@@ -1246,6 +2207,7 @@ function openPackageModal(id) {
         <h3 class="subhead" style="margin: 0;">${item.title}</h3>
         <div class="card-meta">${item.city}, ${item.country} · ${item.region || "Destino principal"} · ${formatDateRange(item.startDate, item.endDate)}</div>
         <p class="card-copy">${item.summary || "Sin descripción."}</p>
+        <div id="packageDetailMap" class="mini-map-frame mini-map-frame--modal"></div>
         <ul class="detail-list">
           <li>Precio base: ${item.basePrice || "-"}</li>
           <li>Precio final: ${item.finalPrice || item.basePrice || "-"}</li>
@@ -1274,6 +2236,7 @@ function openPackageModal(id) {
       </div>
     </div>
   `);
+  renderPackageDetailMap(item);
 }
 
 function openCountryModal(code) {
@@ -1301,9 +2264,10 @@ function focusPackageOnMap(id) {
   const item = state.packages.find((entry) => entry.id === id);
   if (!item || !state.map) return;
   const coords = resolvePackageCoords(item);
+  travelTabs.setActiveTab?.("cruises");
   state.map.setView(coords, 5, { animate: true });
   closeModal();
-  document.getElementById("mapa").scrollIntoView({ behavior: "smooth", block: "start" });
+  refreshVisibleMaps();
 }
 
 function showToast(message) {
@@ -1315,8 +2279,139 @@ function showToast(message) {
   }, 2400);
 }
 
+function pushLog(text, meta = "") {
+  const item = { time: new Date().toLocaleTimeString(), text, meta };
+  state.logEntries.unshift(item);
+  state.logEntries = state.logEntries.slice(0, 24);
+  if (dom.logFeed) {
+    dom.logFeed.innerHTML = state.logEntries.map((entry) => `
+      <article class="log-entry">
+        <div class="log-entry__meta">${entry.time}${entry.meta ? ` · ${entry.meta}` : ""}</div>
+        <div class="log-entry__text">${entry.text}</div>
+      </article>
+    `).join("");
+  }
+  if (dom.logStatus) dom.logStatus.textContent = `${state.logEntries.length} eventos visibles`;
+}
+
+function setupTravelCursor() {
+  if (!dom.travelCursor) return;
+  const finePointer = window.matchMedia("(pointer: fine) and (hover: hover)");
+  if (!finePointer.matches) return;
+
+  document.body.classList.add("has-custom-cursor");
+
+  const cursor = dom.travelCursor;
+  let targetX = window.innerWidth / 2;
+  let targetY = window.innerHeight / 2;
+  let currentX = targetX;
+  let currentY = targetY;
+  let rafId = 0;
+  let visible = false;
+  let sparkleTimer = 0;
+  let spinTimer = 0;
+  let spinFrameId = 0;
+
+  const step = () => {
+    currentX += (targetX - currentX) * 0.1;
+    currentY += (targetY - currentY) * 0.1;
+    cursor.style.setProperty("--cursor-x", `${currentX - 28}px`);
+    cursor.style.setProperty("--cursor-y", `${currentY - 28}px`);
+    if (visible) {
+      cursor.classList.add("is-visible");
+      rafId = window.requestAnimationFrame(step);
+      return;
+    }
+    rafId = 0;
+  };
+
+  const handlePointerMove = (event) => {
+    if (event.pointerType && event.pointerType !== "mouse" && event.pointerType !== "pen") return;
+    targetX = event.clientX;
+    targetY = event.clientY;
+    visible = true;
+    if (!rafId) {
+      rafId = window.requestAnimationFrame(step);
+    }
+  };
+
+  const showCursor = () => {
+    visible = true;
+    cursor.classList.add("is-visible");
+  };
+
+  const hideCursor = () => {
+    visible = false;
+    cursor.classList.remove("is-visible");
+    cursor.classList.remove("is-clicking");
+  };
+
+  const handleDown = () => cursor.classList.add("is-clicking");
+  const handleUp = () => cursor.classList.remove("is-clicking");
+
+  const triggerSparkleSpin = () => {
+    if (!visible) return;
+    cursor.classList.add("is-spinning");
+    cursor.classList.add("is-sparkling");
+    const plane = cursor.querySelector(".travel-cursor__plane");
+    if (!plane) return;
+    const start = performance.now();
+    const duration = 900;
+
+    const spin = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const angle = progress * 360;
+      plane.style.transform = `rotate(${angle}deg)`;
+      if (progress < 1 && visible) {
+        spinFrameId = window.requestAnimationFrame(spin);
+        return;
+      }
+      plane.style.transform = "";
+      cursor.classList.remove("is-spinning");
+      window.setTimeout(() => cursor.classList.remove("is-sparkling"), 300);
+    };
+
+    if (spinFrameId) window.cancelAnimationFrame(spinFrameId);
+    spinFrameId = window.requestAnimationFrame(spin);
+  };
+
+  const scheduleSparkleSpin = () => {
+    window.clearInterval(spinTimer);
+    spinTimer = window.setInterval(triggerSparkleSpin, 10000);
+  };
+
+  document.addEventListener("pointermove", handlePointerMove, { passive: true });
+  document.addEventListener("pointerdown", handleDown, { passive: true });
+  document.addEventListener("pointerup", handleUp, { passive: true });
+  document.addEventListener("pointerleave", hideCursor);
+  window.addEventListener("blur", hideCursor);
+  window.addEventListener("focus", showCursor);
+  document.addEventListener("mouseenter", showCursor, { passive: true });
+  document.addEventListener("mouseleave", hideCursor, { passive: true });
+
+  window.addEventListener("scroll", () => {
+    if (visible) cursor.classList.add("is-visible");
+  }, { passive: true });
+
+  window.addEventListener("blur", () => {
+    visible = false;
+    cursor.classList.remove("is-visible");
+    cursor.classList.remove("is-clicking");
+  });
+
+  sparkleTimer = window.setTimeout(() => {
+    scheduleSparkleSpin();
+    triggerSparkleSpin();
+  }, 10000);
+
+  window.addEventListener("focus", () => {
+    if (!spinTimer) scheduleSparkleSpin();
+  });
+}
+
 function renderAll() {
   try {
+    renderHomeWorkbench();
     renderPackages();
     buildMiniBookingItems();
     renderEditorial();
@@ -1335,7 +2430,24 @@ function renderAll() {
   }
 }
 
+function refreshVisibleMaps() {
+  renderHomeWorkbench();
+  renderPackagesMiniMap();
+  renderHotelMiniMap();
+  void buildHotelSuggestions();
+  if (state.map) {
+    window.requestAnimationFrame(() => state.map.invalidateSize());
+  }
+  travelMapWidgets.invalidateMiniMap?.("packagesMiniMap");
+  travelMapWidgets.invalidateMiniMap?.("hotelMiniMap");
+}
+
 function bindEvents() {
+  window.addEventListener("travel:tabchange", (event) => {
+    state.activeTab = event.detail?.tab || "home";
+    refreshVisibleMaps();
+  });
+
   dom.languageSelect.addEventListener("change", (event) => {
     state.settings.lang = event.target.value;
     saveSettings();
@@ -1364,6 +2476,40 @@ function bindEvents() {
   dom.searchChildren.addEventListener("input", () => {
     buildChildAgeInputs();
     renderAll();
+  });
+
+  [
+    dom.homeCity,
+    dom.homeAdults,
+    dom.homeChildren,
+    dom.homeOrigin,
+    dom.homeDepartureDate,
+    dom.homeReturnDate,
+    dom.homeCheckin,
+    dom.homeCheckout
+  ].forEach((input) => {
+    input?.addEventListener("input", renderHomeWorkbench);
+    input?.addEventListener("blur", () => {
+      if (input === dom.homeCity && dom.homeCity?.value.trim()) {
+        pushLog("Home ciudad seleccionada", dom.homeCity.value.trim());
+      }
+      renderHomeWorkbench();
+    });
+    input?.addEventListener("change", () => {
+      if (input === dom.homeCity && dom.homeCity?.value.trim()) {
+        pushLog("Home ciudad cambiada", dom.homeCity.value.trim());
+      }
+      renderHomeWorkbench();
+    });
+  });
+
+  [dom.homeModeFlightHotel, dom.homeModeHotelOnly, dom.homeAirportTransport].forEach((input) => {
+    input?.addEventListener("change", () => {
+      state.home.mode = dom.homeModeHotelOnly?.checked ? "hotel-only" : "flight-hotel";
+      state.home.transport = Boolean(dom.homeAirportTransport?.checked);
+      renderHomeModeVisibility();
+      renderHomeWorkbench();
+    });
   });
 
   dom.clearSearchButton.addEventListener("click", () => {
@@ -1403,6 +2549,63 @@ function bindEvents() {
     input.addEventListener("change", buildMiniBookingItems);
   });
 
+  [dom.miniBookingDestination, dom.miniBookingCountry].forEach((input) => {
+    input.addEventListener("blur", () => {
+      if (dom.miniBookingDestination.value.trim() || dom.miniBookingCountry.value.trim()) {
+        pushLog("Hotel ciudad seleccionada", [dom.miniBookingDestination.value.trim(), dom.miniBookingCountry.value.trim()].filter(Boolean).join(", "));
+      }
+      renderHotelMiniMap();
+      void buildHotelSuggestions();
+      refreshVisibleMaps();
+    });
+  });
+
+  Array.from(document.querySelectorAll("[data-hotel-provider]")).forEach((button) => {
+    button.addEventListener("click", () => {
+      const provider = button.dataset.hotelProvider;
+      dom.miniBookingProvider.value = provider;
+      const search = getMiniBookingState();
+      const destinationText = [search.destination, search.country].filter(Boolean).join(", ");
+      if (!destinationText) {
+        showToast("Completa destino para abrir el proveedor.");
+        return;
+      }
+
+      const activeSearch = {
+        startDate: search.checkin,
+        endDate: search.checkout,
+        adults: search.adults,
+        children: search.children
+      };
+
+      const providerItem = sanitizePackage({
+        title: `${referralProviders[provider]?.label || provider} hotel search`,
+        city: search.destination,
+        country: search.country,
+        startDate: search.checkin,
+        endDate: search.checkout,
+        referral: {
+          provider,
+          kind: provider === "booking" ? "search" : "hotel",
+          affiliateId: "",
+          destinationId: search.bookingDestId,
+          destinationType: "city",
+          rooms: search.rooms,
+          campaign: "hotel_tab_action",
+          baseUrl: ""
+        },
+        link: "#"
+      });
+
+      const url = buildAffiliateLink(providerItem, activeSearch);
+      if (!url) {
+        showToast("Completa check-in y check-out para abrir ese proveedor.");
+        return;
+      }
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  });
+
   dom.miniBookingReset.addEventListener("click", () => {
     dom.miniBookingDestination.value = "";
     dom.miniBookingCountry.value = "";
@@ -1415,6 +2618,33 @@ function bindEvents() {
     dom.miniBookingDestId.value = "";
     buildMiniBookingItems();
   });
+
+  if (dom.chatbotForm && dom.chatbotInput) {
+    dom.chatbotForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      handleChatbotSearch(dom.chatbotInput.value);
+      dom.chatbotInput.value = "";
+    });
+  }
+
+  if (dom.chatbotClose && dom.chatbot) {
+    dom.chatbotClose.addEventListener("click", () => {
+      dom.chatbot.classList.add("is-collapsed");
+    });
+  }
+
+  dom.logClearButton?.addEventListener("click", () => {
+    state.logEntries = [];
+    if (dom.logFeed) dom.logFeed.innerHTML = "";
+    if (dom.logStatus) dom.logStatus.textContent = "0 eventos visibles";
+  });
+
+  if (dom.chatbotToggle && dom.chatbot) {
+    dom.chatbotToggle.addEventListener("click", () => {
+      dom.chatbot.classList.remove("is-collapsed");
+      dom.chatbotInput?.focus();
+    });
+  }
 
   dom.countrySearch.addEventListener("input", (event) => {
     state.countrySearch = event.target.value;
@@ -1578,9 +2808,14 @@ function init() {
   buildChildAgeInputs();
   initializeMap();
   renderSuggestions();
+  renderChatbot();
   if (dom.adminForm) resetAdminForm();
   if (dom.adminApp) setAdminVisibility();
   bindEvents();
+  setupTravelCursor();
+  prefillHomeOrigin();
+  travelTabs.initTabs?.("home");
+  loadGlobalCountries();
   savePackages();
   renderAll();
 }

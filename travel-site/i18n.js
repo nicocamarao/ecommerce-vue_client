@@ -1,10 +1,11 @@
 const translations = {
   es: {
-    brand_tagline: "Promos, vuelos y destinos en una sola app",
-    nav_search: "Buscador",
-    nav_packages: "Promos",
-    nav_map: "Mapa",
-    nav_countries: "Paises",
+    brand_tagline: "Promos, hoteles, experiencias y cruceros en una sola app",
+    nav_home: "Home",
+    nav_packages: "Paquetes en oferta",
+    nav_hotel: "Sólo hotel",
+    nav_experience: "Experiencia",
+    nav_cruises: "Cruceros",
     nav_admin: "Admin",
     hero_eyebrow: "Travel platform finalizable",
     hero_title: "Promos visibles, mapa real y base lista para crecer a vuelos personalizados.",
@@ -118,14 +119,15 @@ const translations = {
     admin_save: "Guardar",
     admin_list_title: "Promos cargadas",
     admin_list_body: "Editar, borrar, revisar links y verificar la ruta desde el mismo panel.",
-    footer_copy: "Travel Site preparado para crecer a motor de paquetes y vuelos personalizados."
+    footer_copy: "TRAVEL TIPS UY preparado para crecer a motor de paquetes, hoteles, cruceros y experiencias."
   },
   en: {
-    brand_tagline: "Deals, flights and destinations in one app",
-    nav_search: "Search",
-    nav_packages: "Deals",
-    nav_map: "Map",
-    nav_countries: "Countries",
+    brand_tagline: "Deals, hotels, experiences and cruises in one app",
+    nav_home: "Home",
+    nav_packages: "Offers",
+    nav_hotel: "Hotel only",
+    nav_experience: "Experience",
+    nav_cruises: "Cruises",
     nav_admin: "Admin",
     hero_eyebrow: "Travel platform",
     hero_title: "Visible deals, a real map, and a base ready for custom flight growth.",
@@ -239,14 +241,15 @@ const translations = {
     admin_save: "Save",
     admin_list_title: "Loaded deals",
     admin_list_body: "Edit, delete, review links and inspect route from the same panel.",
-    footer_copy: "Travel Site ready to grow into a custom deals and flights engine."
+    footer_copy: "TRAVEL TIPS UY ready to grow into a deals, hotels, cruises and experiences engine."
   },
   pt: {
-    brand_tagline: "Promocoes, voos e destinos em um app",
-    nav_search: "Busca",
+    brand_tagline: "Promocoes, hoteis, experiencias e cruzeiros em um app",
+    nav_home: "Home",
     nav_packages: "Promocoes",
-    nav_map: "Mapa",
-    nav_countries: "Paises",
+    nav_hotel: "Só hotel",
+    nav_experience: "Experiencia",
+    nav_cruises: "Cruzeiros",
     nav_admin: "Admin",
     hero_eyebrow: "Plataforma de viagens",
     hero_title: "Promocoes visiveis, mapa real e base pronta para crescer com voos personalizados.",
@@ -360,7 +363,7 @@ const translations = {
     admin_save: "Salvar",
     admin_list_title: "Promocoes carregadas",
     admin_list_body: "Editar, apagar, revisar links e inspecionar rota no mesmo painel.",
-    footer_copy: "Travel Site pronto para crescer como motor de promocoes e voos personalizados."
+    footer_copy: "TRAVEL TIPS UY pronto para crescer como motor de promocoes, hoteis, cruzeiros e experiencias."
   }
 };
 
