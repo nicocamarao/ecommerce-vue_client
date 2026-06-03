@@ -1,0 +1,2362 @@
+diff --git a//Users/nfiumarelli/Documents/ecommerce-vue_client/travel-site/index.html b//Users/nfiumarelli/Documents/ecommerce-vue_client/travel-site/index.html
+new file mode 100644
+--- /dev/null
++++ b//Users/nfiumarelli/Documents/ecommerce-vue_client/travel-site/index.html
+@@ -0,0 +1,2357 @@
++<!DOCTYPE html>
++<html lang="es">
++<head>
++  <meta charset="UTF-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++  <title>Travel Site | Promos y destinos</title>
++  <link rel="preconnect" href="https://fonts.googleapis.com" />
++  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
++  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet" />
++  <style>
++    :root {
++      --bg: #f3efe7;
++      --surface: rgba(255, 255, 255, 0.84);
++      --surface-strong: rgba(255, 255, 255, 0.96);
++      --ink: #142027;
++      --muted: #58666e;
++      --line: rgba(20, 32, 39, 0.12);
++      --deep: #113b4a;
++      --accent: #df6d3f;
++      --accent-soft: #f2b77f;
++      --success: #126c63;
++      --shadow: 0 24px 60px rgba(12, 31, 44, 0.12);
++      --radius-lg: 28px;
++      --radius-md: 18px;
++      --radius-sm: 12px;
++      --max: 1200px;
++    }
++
++    * {
++      box-sizing: border-box;
++    }
++
++    html {
++      scroll-behavior: smooth;
++    }
++
++    body {
++      margin: 0;
++      font-family: "Manrope", sans-serif;
++      color: var(--ink);
++      background:
++        radial-gradient(circle at top left, rgba(223, 109, 63, 0.18), transparent 30%),
++        radial-gradient(circle at top right, rgba(17, 59, 74, 0.18), transparent 28%),
++        linear-gradient(180deg, #f5f1e8 0%, #eef4f6 100%);
++    }
++
++    img {
++      max-width: 100%;
++      display: block;
++    }
++
++    a {
++      color: inherit;
++      text-decoration: none;
++    }
++
++    button,
++    input,
++    select,
++    textarea {
++      font: inherit;
++    }
++
++    .container {
++      width: min(calc(100% - 32px), var(--max));
++      margin: 0 auto;
++    }
++
++    .site-header {
++      position: sticky;
++      top: 0;
++      z-index: 50;
++      backdrop-filter: blur(16px);
++      background: rgba(10, 26, 34, 0.78);
++      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
++    }
++
++    .site-header__inner {
++      display: flex;
++      align-items: center;
++      justify-content: space-between;
++      gap: 18px;
++      min-height: 74px;
++    }
++
++    .brand {
++      display: flex;
++      align-items: center;
++      gap: 14px;
++    }
++
++    .brand-mark {
++      width: 42px;
++      height: 42px;
++      border-radius: 14px;
++      background:
++        linear-gradient(140deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.04)),
++        linear-gradient(135deg, var(--deep), #1c6c78);
++      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
++      position: relative;
++      overflow: hidden;
++    }
++
++    .brand-mark::before,
++    .brand-mark::after {
++      content: "";
++      position: absolute;
++      border-radius: 999px;
++    }
++
++    .brand-mark::before {
++      width: 26px;
++      height: 26px;
++      background: rgba(255, 255, 255, 0.24);
++      top: -8px;
++      right: -6px;
++    }
++
++    .brand-mark::after {
++      width: 16px;
++      height: 16px;
++      background: var(--accent-soft);
++      left: 8px;
++      bottom: 8px;
++    }
++
++    .brand-copy strong {
++      display: block;
++      font-size: 0.95rem;
++      letter-spacing: 0.18em;
++      text-transform: uppercase;
++      color: #f7f3eb;
++    }
++
++    .brand-copy span {
++      display: block;
++      font-size: 0.78rem;
++      color: rgba(247, 243, 235, 0.74);
++    }
++
++    .nav-links {
++      display: flex;
++      align-items: center;
++      gap: 10px;
++      flex-wrap: wrap;
++      justify-content: flex-end;
++    }
++
++    .nav-links a,
++    .nav-links button {
++      border: 0;
++      padding: 10px 14px;
++      border-radius: 999px;
++      background: transparent;
++      color: rgba(255, 255, 255, 0.86);
++      cursor: pointer;
++      transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
++    }
++
++    .nav-links a:hover,
++    .nav-links button:hover {
++      background: rgba(255, 255, 255, 0.1);
++      color: #fff;
++      transform: translateY(-1px);
++    }
++
++    .nav-links .admin-link {
++      background: linear-gradient(135deg, var(--accent), #f09362);
++      color: white;
++      font-weight: 700;
++    }
++
++    .hero {
++      padding: 42px 0 28px;
++    }
++
++    .hero-shell {
++      min-height: 640px;
++      display: grid;
++      grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
++      gap: 26px;
++      align-items: stretch;
++    }
++
++    .hero-copy,
++    .hero-panel {
++      border-radius: var(--radius-lg);
++      overflow: hidden;
++      box-shadow: var(--shadow);
++    }
++
++    .hero-copy {
++      position: relative;
++      padding: 42px;
++      background:
++        linear-gradient(180deg, rgba(9, 21, 28, 0.16), rgba(9, 21, 28, 0.58)),
++        url("https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=1600&q=80") center/cover;
++      color: white;
++      display: flex;
++      flex-direction: column;
++      justify-content: flex-end;
++      min-height: 640px;
++    }
++
++    .eyebrow {
++      display: inline-flex;
++      align-items: center;
++      width: fit-content;
++      gap: 8px;
++      padding: 8px 14px;
++      border-radius: 999px;
++      background: rgba(255, 255, 255, 0.12);
++      border: 1px solid rgba(255, 255, 255, 0.16);
++      font-size: 0.76rem;
++      text-transform: uppercase;
++      letter-spacing: 0.18em;
++      font-weight: 700;
++      margin-bottom: 18px;
++    }
++
++    .hero-copy h1,
++    .section-head h2,
++    .admin-title,
++    .modal-card h3 {
++      font-family: "Cormorant Garamond", serif;
++      line-height: 0.96;
++      margin: 0;
++    }
++
++    .hero-copy h1 {
++      font-size: clamp(3.5rem, 7vw, 6.6rem);
++      max-width: 680px;
++    }
++
++    .hero-copy p {
++      max-width: 600px;
++      font-size: 1.06rem;
++      line-height: 1.8;
++      color: rgba(255, 255, 255, 0.84);
++      margin: 18px 0 28px;
++    }
++
++    .hero-actions {
++      display: flex;
++      flex-wrap: wrap;
++      gap: 12px;
++    }
++
++    .button,
++    .button-secondary,
++    .button-ghost {
++      border: 0;
++      cursor: pointer;
++      border-radius: 999px;
++      padding: 14px 20px;
++      font-weight: 800;
++      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
++    }
++
++    .button {
++      background: linear-gradient(135deg, var(--accent), #f09867);
++      color: white;
++      box-shadow: 0 12px 28px rgba(223, 109, 63, 0.28);
++    }
++
++    .button-secondary {
++      background: rgba(255, 255, 255, 0.12);
++      color: white;
++      border: 1px solid rgba(255, 255, 255, 0.16);
++    }
++
++    .button-ghost {
++      background: white;
++      color: var(--deep);
++      border: 1px solid rgba(17, 59, 74, 0.12);
++    }
++
++    .button:hover,
++    .button-secondary:hover,
++    .button-ghost:hover {
++      transform: translateY(-1px);
++    }
++
++    .hero-panel {
++      padding: 24px;
++      background:
++        linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(252, 250, 245, 0.92));
++      border: 1px solid rgba(17, 59, 74, 0.12);
++      display: grid;
++      gap: 18px;
++    }
++
++    .panel-card {
++      padding: 20px;
++      border-radius: 24px;
++      background: var(--surface-strong);
++      border: 1px solid var(--line);
++    }
++
++    .panel-card strong,
++    .stat strong {
++      display: block;
++      font-size: 1.6rem;
++      color: var(--deep);
++    }
++
++    .panel-card span,
++    .stat span,
++    .section-head p,
++    .card-meta,
++    .muted {
++      color: var(--muted);
++    }
++
++    .stat-row {
++      display: grid;
++      grid-template-columns: repeat(3, minmax(0, 1fr));
++      gap: 12px;
++    }
++
++    .stat {
++      border-radius: 22px;
++      padding: 18px;
++      background: linear-gradient(180deg, #fffefc, #f7f4ed);
++      border: 1px solid rgba(17, 59, 74, 0.1);
++    }
++
++    main {
++      padding-bottom: 96px;
++    }
++
++    section {
++      padding: 38px 0;
++    }
++
++    .section-head {
++      display: flex;
++      justify-content: space-between;
++      gap: 20px;
++      align-items: end;
++      margin-bottom: 24px;
++    }
++
++    .section-head h2 {
++      font-size: clamp(2.7rem, 4vw, 4rem);
++      color: #10242d;
++    }
++
++    .section-head p {
++      max-width: 680px;
++      line-height: 1.75;
++      margin: 10px 0 0;
++    }
++
++    .pill-row {
++      display: flex;
++      gap: 10px;
++      flex-wrap: wrap;
++      margin-top: 14px;
++    }
++
++    .pill {
++      padding: 9px 14px;
++      border-radius: 999px;
++      background: rgba(17, 59, 74, 0.08);
++      color: var(--deep);
++      font-size: 0.84rem;
++      font-weight: 700;
++    }
++
++    .package-grid,
++    .tips-grid,
++    .exotic-grid,
++    .country-grid,
++    .admin-list {
++      display: grid;
++      gap: 18px;
++    }
++
++    .package-grid {
++      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
++    }
++
++    .tips-grid,
++    .exotic-grid,
++    .country-grid {
++      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
++    }
++
++    .card {
++      border-radius: 26px;
++      overflow: hidden;
++      background: var(--surface-strong);
++      border: 1px solid var(--line);
++      box-shadow: 0 18px 44px rgba(12, 31, 44, 0.08);
++      transition: transform 0.2s ease, box-shadow 0.2s ease;
++    }
++
++    .card:hover {
++      transform: translateY(-3px);
++      box-shadow: 0 24px 52px rgba(12, 31, 44, 0.12);
++    }
++
++    .card-image {
++      position: relative;
++      min-height: 220px;
++      background: #dbe6eb;
++    }
++
++    .card-image img {
++      width: 100%;
++      height: 100%;
++      object-fit: cover;
++    }
++
++    .card-tag {
++      position: absolute;
++      left: 16px;
++      top: 16px;
++      border-radius: 999px;
++      padding: 8px 12px;
++      background: rgba(12, 23, 29, 0.7);
++      color: white;
++      font-size: 0.76rem;
++      text-transform: uppercase;
++      letter-spacing: 0.14em;
++      font-weight: 800;
++    }
++
++    .card-body {
++      padding: 20px;
++    }
++
++    .card-body h3 {
++      margin: 0 0 8px;
++      font-size: 1.42rem;
++      line-height: 1.15;
++    }
++
++    .card-body p {
++      line-height: 1.65;
++      color: var(--muted);
++      margin: 0 0 16px;
++    }
++
++    .card-list {
++      margin: 0 0 16px;
++      padding-left: 18px;
++      color: #304047;
++      line-height: 1.65;
++    }
++
++    .card-footer {
++      display: flex;
++      justify-content: space-between;
++      gap: 12px;
++      align-items: center;
++      flex-wrap: wrap;
++    }
++
++    .price {
++      display: grid;
++      gap: 4px;
++    }
++
++    .price strong {
++      font-size: 1.34rem;
++      color: var(--deep);
++    }
++
++    .map-shell {
++      display: grid;
++      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
++      gap: 22px;
++      align-items: start;
++    }
++
++    .world-map {
++      position: relative;
++      min-height: 480px;
++      border-radius: 30px;
++      overflow: hidden;
++      border: 1px solid rgba(17, 59, 74, 0.14);
++      background:
++        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.14)),
++        linear-gradient(180deg, rgba(13, 79, 93, 0.9), rgba(7, 31, 41, 0.92)),
++        url("https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg") center/cover no-repeat;
++      box-shadow: var(--shadow);
++      isolation: isolate;
++    }
++
++    .world-map::before {
++      content: "";
++      position: absolute;
++      inset: 0;
++      background:
++        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.18), transparent 20%),
++        radial-gradient(circle at 78% 22%, rgba(223, 109, 63, 0.16), transparent 18%);
++      z-index: 0;
++    }
++
++    .map-overlay {
++      position: absolute;
++      inset: 0;
++      z-index: 1;
++    }
++
++    .map-pin {
++      position: absolute;
++      transform: translate(-50%, -50%);
++      width: 16px;
++      height: 16px;
++      border-radius: 999px;
++      border: 3px solid white;
++      background: var(--accent);
++      box-shadow: 0 0 0 8px rgba(223, 109, 63, 0.18);
++      cursor: pointer;
++    }
++
++    .map-pin span {
++      position: absolute;
++      left: 50%;
++      top: calc(100% + 10px);
++      transform: translateX(-50%);
++      white-space: nowrap;
++      padding: 8px 12px;
++      border-radius: 999px;
++      background: rgba(6, 16, 21, 0.84);
++      color: white;
++      font-size: 0.78rem;
++      font-weight: 700;
++      letter-spacing: 0.02em;
++    }
++
++    .map-list {
++      display: grid;
++      gap: 14px;
++    }
++
++    .map-list-item {
++      display: grid;
++      gap: 8px;
++      padding: 18px;
++      border-radius: 20px;
++      background: var(--surface-strong);
++      border: 1px solid var(--line);
++      box-shadow: 0 18px 40px rgba(12, 31, 44, 0.08);
++    }
++
++    .map-list-item strong {
++      font-size: 1.04rem;
++      color: var(--deep);
++    }
++
++    .country-toolbar {
++      display: flex;
++      justify-content: space-between;
++      align-items: center;
++      gap: 16px;
++      margin-bottom: 20px;
++      flex-wrap: wrap;
++    }
++
++    .filter-group {
++      display: flex;
++      gap: 10px;
++      flex-wrap: wrap;
++    }
++
++    .filter-button {
++      border: 1px solid rgba(17, 59, 74, 0.14);
++      background: rgba(255, 255, 255, 0.78);
++      color: var(--deep);
++      border-radius: 999px;
++      padding: 10px 14px;
++      cursor: pointer;
++      font-weight: 700;
++      transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
++    }
++
++    .filter-button.is-active {
++      background: linear-gradient(135deg, var(--deep), #1e6674);
++      color: white;
++      border-color: transparent;
++    }
++
++    .search-input,
++    .field input,
++    .field select,
++    .field textarea,
++    .admin-login input {
++      width: 100%;
++      border-radius: 16px;
++      border: 1px solid rgba(17, 59, 74, 0.16);
++      background: rgba(255, 255, 255, 0.92);
++      padding: 14px 16px;
++      color: var(--ink);
++    }
++
++    .field textarea {
++      min-height: 120px;
++      resize: vertical;
++    }
++
++    .country-card {
++      display: grid;
++      gap: 16px;
++      padding: 20px;
++    }
++
++    .country-flag {
++      width: 48px;
++      height: 34px;
++      border-radius: 10px;
++      overflow: hidden;
++      border: 1px solid rgba(17, 59, 74, 0.12);
++      box-shadow: 0 10px 24px rgba(11, 32, 44, 0.1);
++    }
++
++    .country-card h3 {
++      margin: 0;
++      font-size: 1.28rem;
++    }
++
++    .country-meta {
++      display: flex;
++      gap: 8px;
++      flex-wrap: wrap;
++      align-items: center;
++      color: var(--muted);
++      font-size: 0.88rem;
++    }
++
++    .modal,
++    .toast {
++      position: fixed;
++      inset: 0;
++      display: none;
++      z-index: 80;
++    }
++
++    .modal.is-open {
++      display: grid;
++      place-items: center;
++      padding: 20px;
++      background: rgba(7, 18, 24, 0.56);
++      backdrop-filter: blur(10px);
++    }
++
++    .modal-card {
++      width: min(900px, 100%);
++      max-height: calc(100vh - 40px);
++      overflow: auto;
++      border-radius: 28px;
++      background: rgba(255, 255, 255, 0.98);
++      box-shadow: 0 34px 90px rgba(7, 18, 24, 0.28);
++      border: 1px solid rgba(17, 59, 74, 0.16);
++    }
++
++    .modal-cover {
++      width: 100%;
++      height: 280px;
++      object-fit: cover;
++    }
++
++    .modal-content {
++      padding: 24px;
++      display: grid;
++      gap: 18px;
++    }
++
++    .modal-close {
++      position: absolute;
++      top: 18px;
++      right: 18px;
++      width: 42px;
++      height: 42px;
++      border: 0;
++      border-radius: 999px;
++      background: rgba(10, 21, 28, 0.74);
++      color: white;
++      cursor: pointer;
++    }
++
++    .admin-shell {
++      border-radius: 32px;
++      padding: 30px;
++      background:
++        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 245, 238, 0.92));
++      border: 1px solid rgba(17, 59, 74, 0.14);
++      box-shadow: var(--shadow);
++    }
++
++    .admin-top {
++      display: flex;
++      align-items: end;
++      justify-content: space-between;
++      gap: 20px;
++      margin-bottom: 24px;
++      flex-wrap: wrap;
++    }
++
++    .admin-title {
++      font-size: clamp(2.6rem, 4vw, 4rem);
++      color: #10242d;
++    }
++
++    .admin-note {
++      padding: 12px 16px;
++      border-radius: 16px;
++      background: rgba(17, 59, 74, 0.08);
++      color: var(--deep);
++      font-size: 0.92rem;
++      font-weight: 700;
++    }
++
++    .admin-login {
++      display: grid;
++      gap: 18px;
++      max-width: 420px;
++    }
++
++    .wizard {
++      display: none;
++      gap: 22px;
++    }
++
++    .wizard.is-open {
++      display: grid;
++    }
++
++    .wizard-steps {
++      display: grid;
++      grid-template-columns: repeat(4, minmax(0, 1fr));
++      gap: 12px;
++    }
++
++    .wizard-step {
++      padding: 14px;
++      border-radius: 18px;
++      border: 1px solid rgba(17, 59, 74, 0.14);
++      background: rgba(255, 255, 255, 0.86);
++      display: grid;
++      gap: 6px;
++    }
++
++    .wizard-step.is-current {
++      background: linear-gradient(135deg, var(--deep), #1a5e6b);
++      color: white;
++      border-color: transparent;
++    }
++
++    .wizard-step span {
++      font-size: 0.78rem;
++      text-transform: uppercase;
++      letter-spacing: 0.12em;
++      font-weight: 800;
++    }
++
++    .wizard-panel {
++      display: none;
++      gap: 18px;
++      padding: 24px;
++      border-radius: 24px;
++      background: rgba(255, 255, 255, 0.92);
++      border: 1px solid rgba(17, 59, 74, 0.12);
++    }
++
++    .wizard-panel.is-current {
++      display: grid;
++    }
++
++    .form-grid {
++      display: grid;
++      grid-template-columns: repeat(2, minmax(0, 1fr));
++      gap: 16px;
++    }
++
++    .field {
++      display: grid;
++      gap: 8px;
++    }
++
++    .field label {
++      font-size: 0.9rem;
++      font-weight: 700;
++      color: var(--deep);
++    }
++
++    .field--full {
++      grid-column: 1 / -1;
++    }
++
++    .preview-grid {
++      display: grid;
++      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
++      gap: 12px;
++    }
++
++    .preview-grid img {
++      width: 100%;
++      aspect-ratio: 1 / 1;
++      object-fit: cover;
++      border-radius: 18px;
++      border: 1px solid rgba(17, 59, 74, 0.12);
++    }
++
++    .wizard-nav,
++    .admin-actions {
++      display: flex;
++      justify-content: space-between;
++      gap: 12px;
++      align-items: center;
++      flex-wrap: wrap;
++    }
++
++    .admin-list {
++      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
++    }
++
++    .admin-item {
++      padding: 20px;
++      border-radius: 24px;
++      background: rgba(255, 255, 255, 0.92);
++      border: 1px solid rgba(17, 59, 74, 0.12);
++      display: grid;
++      gap: 14px;
++    }
++
++    .admin-item img {
++      width: 100%;
++      height: 170px;
++      object-fit: cover;
++      border-radius: 18px;
++    }
++
++    .admin-item__actions {
++      display: flex;
++      gap: 10px;
++      flex-wrap: wrap;
++    }
++
++    .button-small {
++      border: 0;
++      border-radius: 999px;
++      padding: 10px 14px;
++      cursor: pointer;
++      font-weight: 800;
++    }
++
++    .button-small.edit {
++      background: rgba(17, 59, 74, 0.12);
++      color: var(--deep);
++    }
++
++    .button-small.delete {
++      background: rgba(223, 109, 63, 0.12);
++      color: #9a401d;
++    }
++
++    .review-card {
++      display: grid;
++      gap: 14px;
++      padding: 18px;
++      border-radius: 20px;
++      background: rgba(17, 59, 74, 0.05);
++      border: 1px solid rgba(17, 59, 74, 0.12);
++    }
++
++    .review-pair {
++      display: grid;
++      gap: 4px;
++    }
++
++    .review-pair strong {
++      font-size: 0.84rem;
++      text-transform: uppercase;
++      letter-spacing: 0.12em;
++      color: var(--deep);
++    }
++
++    .empty-state {
++      padding: 24px;
++      border-radius: 24px;
++      border: 1px dashed rgba(17, 59, 74, 0.2);
++      color: var(--muted);
++      background: rgba(255, 255, 255, 0.58);
++    }
++
++    .toast {
++      inset: auto 20px 20px auto;
++      z-index: 90;
++      width: min(360px, calc(100% - 40px));
++      padding: 16px 18px;
++      border-radius: 18px;
++      color: white;
++      background: rgba(18, 108, 99, 0.94);
++      box-shadow: 0 20px 44px rgba(8, 37, 34, 0.28);
++    }
++
++    .toast.is-open {
++      display: block;
++    }
++
++    footer {
++      padding: 24px 0 52px;
++      color: var(--muted);
++    }
++
++    @media (max-width: 1080px) {
++      .hero-shell,
++      .map-shell {
++        grid-template-columns: 1fr;
++      }
++    }
++
++    @media (max-width: 760px) {
++      .site-header__inner,
++      .section-head,
++      .country-toolbar,
++      .admin-top,
++      .wizard-nav,
++      .admin-actions {
++        align-items: stretch;
++      }
++
++      .hero-copy {
++        padding: 28px;
++        min-height: 540px;
++      }
++
++      .hero-panel,
++      .admin-shell {
++        padding: 22px;
++      }
++
++      .form-grid,
++      .wizard-steps,
++      .stat-row {
++        grid-template-columns: 1fr;
++      }
++
++      .nav-links {
++        display: none;
++      }
++
++      .world-map {
++        min-height: 380px;
++      }
++    }
++  </style>
++</head>
++<body>
++  <header class="site-header">
++    <div class="container site-header__inner">
++      <a class="brand" href="#inicio">
++        <div class="brand-mark" aria-hidden="true"></div>
++        <div class="brand-copy">
++          <strong>Travel Site</strong>
++          <span>Promos, destinos y fichas de viaje</span>
++        </div>
++      </a>
++
++      <nav class="nav-links">
++        <a href="#promos">Promos</a>
++        <a href="#mapa">Mapa</a>
++        <a href="#lugares">Lugares exoticos</a>
++        <a href="#tips">Tips reales</a>
++        <a href="#paises">Paises</a>
++        <a class="admin-link" href="#admin">Admin</a>
++      </nav>
++    </div>
++  </header>
++
++  <main id="inicio">
++    <section class="hero">
++      <div class="container hero-shell">
++        <article class="hero-copy">
++          <div class="eyebrow">sitio unico + admin rapido</div>
++          <h1>Vende promos y presenta destinos sin salir de un solo HTML.</h1>
++          <p>
++            El sitio publico muestra promos listas para vender, destinos inspiradores, tips utiles y fichas por pais.
++            El admin entra solo con password, carga una promo en modo wizard y actualiza el sitio al instante.
++          </p>
++          <div class="hero-actions">
++            <a class="button" href="#promos">Ver paquetes activos</a>
++            <a class="button-secondary" href="#admin">Entrar a admin</a>
++          </div>
++        </article>
++
++        <aside class="hero-panel">
++          <div class="panel-card">
++            <strong>Idea operativa</strong>
++            <span>cargas titulo, fechas, link, descripcion, destino y varias fotos en pocos pasos.</span>
++          </div>
++
++          <div class="stat-row">
++            <div class="stat">
++              <strong id="heroPackageCount">3</strong>
++              <span>promos en memoria</span>
++            </div>
++            <div class="stat">
++              <strong>1</strong>
++              <span>archivo HTML</span>
++            </div>
++            <div class="stat">
++              <strong>1234</strong>
++              <span>password temporal</span>
++            </div>
++          </div>
++
++          <div class="panel-card">
++            <strong>Default del sistema</strong>
++            <span>Salto en Uruguay, Rio de Janeiro en Brasil y Santiago de Chile ya vienen precargados como ejemplo.</span>
++          </div>
++
++          <div class="panel-card">
++            <strong>Persistencia actual</strong>
++            <span>todo vive en memoria del navegador. Si recargas la pagina, vuelve al estado base.</span>
++          </div>
++        </aside>
++      </div>
++    </section>
++
++    <section id="promos">
++      <div class="container">
++        <div class="section-head">
++          <div>
++            <div class="eyebrow" style="color: var(--deep); background: rgba(17, 59, 74, 0.08); border-color: transparent;">paquetes destacados</div>
++            <h2>Promos listas para publicar</h2>
++            <p>El bloque central del negocio: tarjetas claras, varias fotos, datos utiles y CTA directo al link cargado desde el admin.</p>
++            <div class="pill-row">
++              <span class="pill">Actualizacion en vivo desde admin</span>
++              <span class="pill">Dummy base para vender rapido</span>
++              <span class="pill">Ideal para links de afiliado o WhatsApp</span>
++            </div>
++          </div>
++        </div>
++
++        <div id="packagesGrid" class="package-grid"></div>
++      </div>
++    </section>
++
++    <section id="mapa">
++      <div class="container">
++        <div class="section-head">
++          <div>
++            <div class="eyebrow" style="color: var(--deep); background: rgba(17, 59, 74, 0.08); border-color: transparent;">mapa mundi</div>
++            <h2>Todos los paquetes sobre el mapa</h2>
++            <p>Cada promo se posiciona en el mapa en base a sus coordenadas. Si no cargas coordenadas, el sistema usa una aproximacion segun el destino.</p>
++          </div>
++        </div>
++
++        <div class="map-shell">
++          <div class="world-map">
++            <div id="mapMarkers" class="map-overlay"></div>
++          </div>
++
++          <div>
++            <div id="mapList" class="map-list"></div>
++          </div>
++        </div>
++      </div>
++    </section>
++
++    <section id="lugares">
++      <div class="container">
++        <div class="section-head">
++          <div>
++            <div class="eyebrow" style="color: var(--deep); background: rgba(17, 59, 74, 0.08); border-color: transparent;">inspiracion</div>
++            <h2>Lugares exoticos para una home mas completa</h2>
++            <p>Una capa editorial para que el sitio no sea solo una grilla de promos: ideas visuales, texto aspiracional y razones para viajar.</p>
++          </div>
++        </div>
++
++        <div id="exoticGrid" class="exotic-grid"></div>
++      </div>
++    </section>
++
++    <section id="tips">
++      <div class="container">
++        <div class="section-head">
++          <div>
++            <div class="eyebrow" style="color: var(--deep); background: rgba(17, 59, 74, 0.08); border-color: transparent;">tips reales</div>
++            <h2>Consejos utiles para viajar mejor</h2>
++            <p>Textos de apoyo pensados como contenido evergreen: preparacion, equipaje, salud, dinero, conectividad y seguridad.</p>
++          </div>
++        </div>
++
++        <div id="tipsGrid" class="tips-grid"></div>
++      </div>
++    </section>
++
++    <section id="paises">
++      <div class="container">
++        <div class="section-head">
++          <div>
++            <div class="eyebrow" style="color: var(--deep); background: rgba(17, 59, 74, 0.08); border-color: transparent;">directorio</div>
++            <h2>Paises por continente</h2>
++            <p>El usuario puede navegar por continentes, ver la bandera y abrir una ficha con descripcion, ciudades principales y atracciones destacadas.</p>
++          </div>
++        </div>
++
++        <div class="country-toolbar">
++          <div id="continentFilters" class="filter-group"></div>
++          <div style="width: min(320px, 100%);">
++            <input id="countrySearch" class="search-input" type="search" placeholder="Buscar pais o ciudad..." />
++          </div>
++        </div>
++
++        <div id="countryGrid" class="country-grid"></div>
++      </div>
++    </section>
++
++    <section id="admin">
++      <div class="container">
++        <div class="admin-shell">
++          <div class="admin-top">
++            <div>
++              <div class="eyebrow" style="color: var(--deep); background: rgba(17, 59, 74, 0.08); border-color: transparent;">admin</div>
++              <h2 class="admin-title">Carga rapida de promos</h2>
++              <p class="muted" style="max-width: 720px; line-height: 1.75;">
++                Entrada minima con password. Luego aparece un wizard para crear, editar o borrar promos. Todo se guarda solo en memoria hasta cerrar o recargar.
++              </p>
++            </div>
++            <div class="admin-note">Password temporal: 1234</div>
++          </div>
++
++          <div id="adminLogin" class="admin-login">
++            <div class="field">
++              <label for="adminPassword">Password</label>
++              <input id="adminPassword" type="password" placeholder="Ingresa la password" />
++            </div>
++            <div class="admin-actions">
++              <button id="adminLoginButton" class="button" type="button">Entrar</button>
++              <span class="muted">No se pide usuario ni correo.</span>
++            </div>
++          </div>
++
++          <div id="adminWizard" class="wizard">
++            <div class="wizard-steps" id="wizardSteps"></div>
++
++            <form id="packageForm">
++              <div class="wizard-panel is-current" data-step="1">
++                <div>
++                  <strong>Paso 1</strong>
++                  <p class="muted">Define el tipo de promo, titulo, precio y fechas.</p>
++                </div>
++                <div class="form-grid">
++                  <div class="field">
++                    <label for="promoType">Tipo</label>
++                    <select id="promoType" required>
++                      <option value="Paquete">Paquete</option>
++                      <option value="Escapada">Escapada</option>
++                      <option value="Vuelo">Vuelo</option>
++                      <option value="Hotel">Hotel</option>
++                      <option value="Circuito">Circuito</option>
++                    </select>
++                  </div>
++                  <div class="field">
++                    <label for="promoTitle">Titulo</label>
++                    <input id="promoTitle" type="text" placeholder="Ej: Rio de Janeiro en 5 noches" required />
++                  </div>
++                  <div class="field">
++                    <label for="promoPrice">Precio</label>
++                    <input id="promoPrice" type="text" placeholder="Ej: USD 890" required />
++                  </div>
++                  <div class="field">
++                    <label for="promoLink">Link</label>
++                    <input id="promoLink" type="url" placeholder="https://..." required />
++                  </div>
++                  <div class="field">
++                    <label for="promoStart">Fecha inicio</label>
++                    <input id="promoStart" type="date" />
++                  </div>
++                  <div class="field">
++                    <label for="promoEnd">Fecha fin</label>
++                    <input id="promoEnd" type="date" />
++                  </div>
++                </div>
++              </div>
++
++              <div class="wizard-panel" data-step="2">
++                <div>
++                  <strong>Paso 2</strong>
++                  <p class="muted">Carga los datos del destino. Las coordenadas son opcionales.</p>
++                </div>
++                <div class="form-grid">
++                  <div class="field">
++                    <label for="promoContinent">Continente</label>
++                    <select id="promoContinent" required>
++                      <option value="America del Sur">America del Sur</option>
++                      <option value="America del Norte">America del Norte</option>
++                      <option value="Europa">Europa</option>
++                      <option value="Asia">Asia</option>
++                      <option value="Africa">Africa</option>
++                      <option value="Oceania">Oceania</option>
++                    </select>
++                  </div>
++                  <div class="field">
++                    <label for="promoCountry">Pais</label>
++                    <input id="promoCountry" type="text" placeholder="Ej: Uruguay" required />
++                  </div>
++                  <div class="field">
++                    <label for="promoCity">Ciudad</label>
++                    <input id="promoCity" type="text" placeholder="Ej: Salto" required />
++                  </div>
++                  <div class="field">
++                    <label for="promoRegion">Zona o barrio</label>
++                    <input id="promoRegion" type="text" placeholder="Ej: Termas del Dayman" />
++                  </div>
++                  <div class="field">
++                    <label for="promoLat">Latitud</label>
++                    <input id="promoLat" type="number" step="0.0001" placeholder="-31.3833" />
++                  </div>
++                  <div class="field">
++                    <label for="promoLng">Longitud</label>
++                    <input id="promoLng" type="number" step="0.0001" placeholder="-57.9667" />
++                  </div>
++                </div>
++              </div>
++
++              <div class="wizard-panel" data-step="3">
++                <div>
++                  <strong>Paso 3</strong>
++                  <p class="muted">Describe la promo y agrega varias fotos por URL o por archivo.</p>
++                </div>
++                <div class="form-grid">
++                  <div class="field field--full">
++                    <label for="promoSummary">Descripcion</label>
++                    <textarea id="promoSummary" placeholder="Texto principal de la promo"></textarea>
++                  </div>
++                  <div class="field field--full">
++                    <label for="promoHighlights">Highlights</label>
++                    <textarea id="promoHighlights" placeholder="Una linea por highlight. Ej:&#10;Vuelo incluido&#10;Hotel con desayuno&#10;Traslados"></textarea>
++                  </div>
++                  <div class="field field--full">
++                    <label for="promoImageUrls">Fotos por URL</label>
++                    <textarea id="promoImageUrls" placeholder="Pega una URL por linea"></textarea>
++                  </div>
++                  <div class="field field--full">
++                    <label for="promoImages">Fotos desde tu equipo</label>
++                    <input id="promoImages" type="file" accept="image/*" multiple />
++                  </div>
++                  <div class="field field--full">
++                    <label>
++                      <input id="replaceImages" type="checkbox" style="width: auto; margin-right: 8px;" />
++                      Reemplazar imagenes existentes al editar
++                    </label>
++                  </div>
++                  <div class="field field--full">
++                    <label>Preview</label>
++                    <div id="imagePreview" class="preview-grid"></div>
++                  </div>
++                </div>
++              </div>
++
++              <div class="wizard-panel" data-step="4">
++                <div>
++                  <strong>Paso 4</strong>
++                  <p class="muted">Revisa el contenido antes de guardar la promo en memoria.</p>
++                </div>
++                <div id="reviewCard" class="review-card"></div>
++              </div>
++
++              <div class="wizard-nav">
++                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
++                  <button id="prevStep" class="button-ghost" type="button">Anterior</button>
++                  <button id="nextStep" class="button-ghost" type="button">Siguiente</button>
++                </div>
++                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
++                  <button id="resetForm" class="button-ghost" type="button">Limpiar wizard</button>
++                  <button id="savePackage" class="button" type="submit">Guardar promo</button>
++                </div>
++              </div>
++            </form>
++
++            <div>
++              <div class="section-head" style="margin: 10px 0 18px;">
++                <div>
++                  <h2 style="font-size: 2.4rem;">Promos cargadas</h2>
++                  <p>Listado operativo para editar o borrar los paquetes activos.</p>
++                </div>
++              </div>
++              <div id="adminList" class="admin-list"></div>
++            </div>
++          </div>
++        </div>
++      </div>
++    </section>
++  </main>
++
++  <footer>
++    <div class="container">
++      Sitio de ejemplo para construccion de vuelos y turismo. Admin temporal en memoria, sin backend ni persistencia permanente.
++    </div>
++  </footer>
++
++  <div id="detailModal" class="modal" aria-hidden="true"></div>
++  <div id="toast" class="toast" aria-live="polite"></div>
++
++  <script>
++    const PLACEHOLDER_IMAGE = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80";
++    const ADMIN_PASSWORD = "1234";
++    const wizardStepLabels = [
++      { id: 1, title: "Promo", copy: "tipo, titulo y precio" },
++      { id: 2, title: "Destino", copy: "ubicacion y mapa" },
++      { id: 3, title: "Contenido", copy: "descripcion y fotos" },
++      { id: 4, title: "Revision", copy: "resumen final" }
++    ];
++
++    const tips = [
++      {
++        title: "Reserva con margen y revisa condiciones",
++        body: "Antes de emitir o pagar, verifica cambios, equipaje, politica de cancelacion y tasas no incluidas. Es el filtro mas util para evitar reclamos.",
++        source: "Buenas practicas de venta"
++      },
++      {
++        title: "Arma una carpeta con pasaporte, vouchers y seguro",
++        body: "Lleva copia digital y una copia impresa de lo esencial. Si el telefono falla o se queda sin bateria, el viaje sigue resuelto.",
++        source: "Checklist de viaje"
++      },
++      {
++        title: "No armes itinerarios imposibles",
++        body: "La experiencia mejora cuando dejas ventanas reales para traslados, demoras y descanso. Vender agendas demasiado ajustadas genera frustracion.",
++        source: "Operacion de itinerarios"
++      },
++      {
++        title: "Llega al aeropuerto con tiempo segun el tipo de vuelo",
++        body: "El mejor viaje se rompe si se pierde el check-in. Define tiempos distintos para cabotaje, internacional y temporada alta.",
++        source: "Operacion aeroportuaria"
++      },
++      {
++        title: "Lleva metodos de pago mixtos",
++        body: "Combinar tarjeta, efectivo y una reserva digital ayuda frente a bloqueos, cambios de divisa o problemas de red.",
++        source: "Seguridad financiera"
++      },
++      {
++        title: "Compra conectividad antes de aterrizar",
++        body: "Un eSIM o plan internacional resuelve mapas, traslados, confirmaciones y contacto con el hotel desde el minuto cero.",
++        source: "Experiencia en destino"
++      }
++    ];
++
++    const exoticPlaces = [
++      {
++        title: "Socotra, Yemen",
++        summary: "Una isla que parece de otro planeta, con arboles drago, playas casi vacias y una geografia que vuelve la visita profundamente rara y memorable.",
++        image: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        title: "Raja Ampat, Indonesia",
++        summary: "Uno de los grandes destinos del buceo mundial. Islas verdes, agua transparente y una biodiversidad que funciona sola como propuesta de valor.",
++        image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        title: "Salar de Uyuni, Bolivia",
++        summary: "Paisaje minimalista, reflejos perfectos en temporada humeda y una sensacion espacial que vende muy bien en una home inspiracional.",
++        image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        title: "Wadi Rum, Jordania",
++        summary: "Desierto rojo, campamentos boutique y noches abiertas al cielo. Ideal para viajeros que buscan aventura con estetica fuerte.",
++        image: "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1200&q=80"
++      }
++    ];
++
++    const countries = [
++      {
++        continent: "America",
++        name: "Uruguay",
++        code: "uy",
++        summary: "Pais sereno y facil de recorrer, con buen equilibrio entre costa, termas, ciudad y escapadas de fin de semana.",
++        cities: ["Montevideo", "Punta del Este", "Colonia", "Salto"],
++        attractions: ["Rambla de Montevideo", "Casco historico de Colonia", "Termas del Dayman"],
++        image: "https://images.unsplash.com/photo-1578926375605-eaf7559b1458?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "America",
++        name: "Argentina",
++        code: "ar",
++        summary: "Grandes ciudades, vino, paisajes patagonicos y cultura urbana intensa. Funciona para escapadas y viajes largos.",
++        cities: ["Buenos Aires", "Mendoza", "Bariloche", "Cordoba"],
++        attractions: ["Caminito", "Ruta del vino", "Circuito Chico"],
++        image: "https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "America",
++        name: "Brasil",
++        code: "br",
++        summary: "Playas, ciudades gigantes, musica y una oferta enorme para ocio, familia y experiencias tropicales.",
++        cities: ["Rio de Janeiro", "Sao Paulo", "Salvador", "Florianopolis"],
++        attractions: ["Cristo Redentor", "Pan de Azucar", "Pelourinho"],
++        image: "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "America",
++        name: "Chile",
++        code: "cl",
++        summary: "Destino ordenado, gastronomico y con contrastes marcados entre ciudad, vino, nieve, desierto y Patagonia.",
++        cities: ["Santiago", "Valparaiso", "Puerto Varas", "San Pedro de Atacama"],
++        attractions: ["Cerro San Cristobal", "Valle del Maipo", "Desierto de Atacama"],
++        image: "https://images.unsplash.com/photo-1544989164-31d89280f8b1?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "America",
++        name: "Peru",
++        code: "pe",
++        summary: "Historia precolombina, cocina potente y una combinacion muy vendible de ciudad, sierra y experiencias iconicas.",
++        cities: ["Lima", "Cusco", "Arequipa", "Iquitos"],
++        attractions: ["Machu Picchu", "Valle Sagrado", "Centro historico de Lima"],
++        image: "https://images.unsplash.com/photo-1526392060635-9d6019884377?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "America",
++        name: "Colombia",
++        code: "co",
++        summary: "Caribe, montana, ciudades creativas y cafetales. Muy fuerte para vender diversidad en un solo viaje.",
++        cities: ["Bogota", "Cartagena", "Medellin", "Santa Marta"],
++        attractions: ["Ciudad amurallada", "Guatape", "Parque Tayrona"],
++        image: "https://images.unsplash.com/photo-1531065208531-4036c0dba3ca?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "America",
++        name: "Mexico",
++        code: "mx",
++        summary: "Cultura enorme, playas premium, arqueologia y una industria turistica acostumbrada a operar a escala.",
++        cities: ["Ciudad de Mexico", "Cancun", "Merida", "Guadalajara"],
++        attractions: ["Chichen Itza", "Riviera Maya", "Centro historico capitalino"],
++        image: "https://images.unsplash.com/photo-1512813195386-6cf811ad3542?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "America",
++        name: "Canada",
++        code: "ca",
++        summary: "Naturaleza amplia, ciudades ordenadas y viajes con foco en aire libre, nieve y rutas escenicas.",
++        cities: ["Toronto", "Vancouver", "Montreal", "Calgary"],
++        attractions: ["Cataratas del Niagara", "Banff", "Viejo Montreal"],
++        image: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Europa",
++        name: "Espana",
++        code: "es",
++        summary: "Destino completo para cultura, playa, gastronomia y city breaks. Muy noble para viajes multi ciudad.",
++        cities: ["Madrid", "Barcelona", "Sevilla", "Valencia"],
++        attractions: ["Sagrada Familia", "Museo del Prado", "Real Alcazar"],
++        image: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Europa",
++        name: "Francia",
++        code: "fr",
++        summary: "Ciudad iconica, pueblos refinados y una mezcla fuerte entre patrimonio, vino, arte y escapadas regionales.",
++        cities: ["Paris", "Lyon", "Niza", "Marsella"],
++        attractions: ["Torre Eiffel", "Louvre", "Costa Azul"],
++        image: "https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Europa",
++        name: "Italia",
++        code: "it",
++        summary: "Arte, historia, mar y gastronomia. Uno de los mejores paises para vender circuitos de alto valor percibido.",
++        cities: ["Roma", "Florencia", "Venecia", "Milan"],
++        attractions: ["Coliseo", "Canales de Venecia", "Toscana"],
++        image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Europa",
++        name: "Portugal",
++        code: "pt",
++        summary: "Escala humana, buena hoteleria, ciudades faciles de caminar y costa muy rendidora para escapadas.",
++        cities: ["Lisboa", "Porto", "Faro", "Sintra"],
++        attractions: ["Tranvias de Lisboa", "Ribeira", "Palacio da Pena"],
++        image: "https://images.unsplash.com/photo-1513735492246-483525079686?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Europa",
++        name: "Grecia",
++        code: "gr",
++        summary: "Islas, luz, ruinas clasicas y un imaginario turistico muy fuerte para parejas y verano.",
++        cities: ["Atenas", "Santorini", "Mykonos", "Tesalonica"],
++        attractions: ["Acrópolis", "Oia", "Playas del Egeo"],
++        image: "https://images.unsplash.com/photo-1505731131651-3fe6853d5cdd?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Europa",
++        name: "Reino Unido",
++        code: "gb",
++        summary: "City breaks, museos, arquitectura y base ideal para combinar con Escocia, Irlanda o Europa continental.",
++        cities: ["Londres", "Edimburgo", "Manchester", "Liverpool"],
++        attractions: ["Tower Bridge", "British Museum", "Highlands"],
++        image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Asia",
++        name: "Japon",
++        code: "jp",
++        summary: "Precision, tecnologia, tradicion y una experiencia urbana muy distinta a cualquier otra.",
++        cities: ["Tokio", "Kioto", "Osaka", "Hiroshima"],
++        attractions: ["Shibuya", "Templos de Kioto", "Monte Fuji"],
++        image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Asia",
++        name: "Tailandia",
++        code: "th",
++        summary: "Perfecto para combinar ciudad, templos, compras y playas. Muy fuerte para primer viaje a Asia.",
++        cities: ["Bangkok", "Chiang Mai", "Phuket", "Krabi"],
++        attractions: ["Gran Palacio", "Phi Phi", "Mercados flotantes"],
++        image: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Asia",
++        name: "Emiratos Arabes Unidos",
++        code: "ae",
++        summary: "Lujo, escala, compras y arquitectura nueva. Dubai funciona muy bien como producto aspiracional.",
++        cities: ["Dubai", "Abu Dhabi", "Sharjah"],
++        attractions: ["Burj Khalifa", "Desierto de Dubai", "Gran Mezquita Sheikh Zayed"],
++        image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Asia",
++        name: "Turquia",
++        code: "tr",
++        summary: "Cruce de culturas, bazares, mezquitas, globo aerostatico y costa mediterranea en un solo pais.",
++        cities: ["Estambul", "Capadocia", "Antalya", "Esmirna"],
++        attractions: ["Santa Sofia", "Globos en Goreme", "Bazar Egipcio"],
++        image: "https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Asia",
++        name: "Indonesia",
++        code: "id",
++        summary: "Archipielago enorme con propuestas de playa, retiro, surf y cultura visualmente muy potente.",
++        cities: ["Bali", "Yakarta", "Yogyakarta", "Lombok"],
++        attractions: ["Ubud", "Templos de Bali", "Komodo"],
++        image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Africa",
++        name: "Marruecos",
++        code: "ma",
++        summary: "Mercados, desierto, riads y ciudades de color intenso. Vende experiencia sensorial y cultural.",
++        cities: ["Marrakech", "Fez", "Casablanca", "Chefchaouen"],
++        attractions: ["Medina de Fez", "Sahara", "Jardin Majorelle"],
++        image: "https://images.unsplash.com/photo-1489749798305-4fea3ae63d43?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Africa",
++        name: "Egipto",
++        code: "eg",
++        summary: "Historia monumental y una narrativa muy fuerte para circuitos con alto impacto visual.",
++        cities: ["El Cairo", "Luxor", "Asuan", "Sharm el-Sheikh"],
++        attractions: ["Pirámides de Giza", "Valle de los Reyes", "Nilo"],
++        image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73b63?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Africa",
++        name: "Sudafrica",
++        code: "za",
++        summary: "Safari, vino, costa y ciudad. Excelente para vender variedad y naturaleza con buena infraestructura.",
++        cities: ["Ciudad del Cabo", "Johannesburgo", "Durban", "Pretoria"],
++        attractions: ["Table Mountain", "Kruger", "Cape Winelands"],
++        image: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Africa",
++        name: "Tanzania",
++        code: "tz",
++        summary: "Safari premium, Kilimanjaro y Zanzibar. Ideal para combinar aventura y playa.",
++        cities: ["Arusha", "Dar es Salaam", "Zanzibar"],
++        attractions: ["Serengeti", "Ngorongoro", "Playas de Zanzibar"],
++        image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Oceania",
++        name: "Australia",
++        code: "au",
++        summary: "Destino grande y versatil, con ciudades ordenadas, naturaleza extrema y rutas de larga distancia.",
++        cities: ["Sidney", "Melbourne", "Brisbane", "Perth"],
++        attractions: ["Opera House", "Great Ocean Road", "Gran Barrera de Coral"],
++        image: "https://images.unsplash.com/photo-1506973035872-a4f23ef0e2d3?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Oceania",
++        name: "Nueva Zelanda",
++        code: "nz",
++        summary: "Paisaje cinematografico, rutas panoramicas y aventura al aire libre con imagen premium.",
++        cities: ["Auckland", "Queenstown", "Wellington", "Christchurch"],
++        attractions: ["Milford Sound", "Rotorua", "Queenstown Adventure"],
++        image: "https://images.unsplash.com/photo-1507699622108-4be3abd695ad?auto=format&fit=crop&w=1200&q=80"
++      },
++      {
++        continent: "Oceania",
++        name: "Fiyi",
++        code: "fj",
++        summary: "Islas de agua clara, relax y perfil romantico. Muy rendidor para lunas de miel o escape tropical.",
++        cities: ["Nadi", "Suva", "Lautoka"],
++        attractions: ["Mamanucas", "Coral Coast", "Yasawa"],
++        image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80"
++      }
++    ];
++
++    const basePackages = [
++      {
++        id: crypto.randomUUID(),
++        type: "Paquete",
++        title: "Paquete turismo Salto",
++        price: "USD 420",
++        link: "https://example.com/turismo-salto",
++        startDate: "2026-04-10",
++        endDate: "2026-04-14",
++        continent: "America del Sur",
++        country: "Uruguay",
++        city: "Salto",
++        region: "Termas del Dayman",
++        lat: -31.3833,
++        lng: -57.9667,
++        summary: "Escapada termal con dos noches de relax, paseo costero, gastronomia local y traslado interno resuelto.",
++        highlights: ["Termas del Dayman", "Hotel con desayuno", "Paseo por el litoral", "Ideal para fin de semana"],
++        images: [
++          "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
++          "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80"
++        ]
++      },
++      {
++        id: crypto.randomUUID(),
++        type: "Paquete",
++        title: "Rio de Janeiro clasico",
++        price: "USD 890",
++        link: "https://example.com/rio-de-janeiro",
++        startDate: "2026-05-12",
++        endDate: "2026-05-18",
++        continent: "America del Sur",
++        country: "Brasil",
++        city: "Rio de Janeiro",
++        region: "Copacabana",
++        lat: -22.9068,
++        lng: -43.1729,
++        summary: "Promo urbana y de playa con base en Rio, hotel bien ubicado y tiempo libre para Cristo, Pan de Azucar y barrio bohemio.",
++        highlights: ["Hotel en Copacabana", "Sugerencia de city tour", "Ideal primera visita a Rio", "Salida dummy de ejemplo"],
++        images: [
++          "https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1200&q=80",
++          "https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?auto=format&fit=crop&w=1200&q=80"
++        ]
++      },
++      {
++        id: crypto.randomUUID(),
++        type: "Paquete",
++        title: "Santiago de Chile smart city break",
++        price: "USD 640",
++        link: "https://example.com/santiago-de-chile",
++        startDate: "2026-06-03",
++        endDate: "2026-06-07",
++        continent: "America del Sur",
++        country: "Chile",
++        city: "Santiago",
++        region: "Providencia",
++        lat: -33.4489,
++        lng: -70.6693,
++        summary: "Escapada corta con foco en gastronomia, barrios caminables, vista de cordillera y opcion de sumar vina o nieve.",
++        highlights: ["Base en Providencia", "Muy vendible para escapada", "Buena combinacion con tours cercanos", "Dummy del sistema"],
++        images: [
++          "https://images.unsplash.com/photo-1544989164-31d89280f8b1?auto=format&fit=crop&w=1200&q=80",
++          "https://images.unsplash.com/photo-1528543606781-2f6e6857f318?auto=format&fit=crop&w=1200&q=80"
++        ]
++      }
++    ];
++
++    const state = {
++      packages: structuredClone(basePackages),
++      currentStep: 1,
++      adminUnlocked: false,
++      editingId: null,
++      editingImages: [],
++      continentFilter: "Todos",
++      countrySearch: ""
++    };
++
++    const cityCoords = {
++      "salto,uruguay": { lat: -31.3833, lng: -57.9667 },
++      "rio de janeiro,brasil": { lat: -22.9068, lng: -43.1729 },
++      "santiago,chile": { lat: -33.4489, lng: -70.6693 },
++      "montevideo,uruguay": { lat: -34.9011, lng: -56.1645 },
++      "buenos aires,argentina": { lat: -34.6037, lng: -58.3816 },
++      "madrid,espana": { lat: 40.4168, lng: -3.7038 },
++      "paris,francia": { lat: 48.8566, lng: 2.3522 },
++      "tokio,japon": { lat: 35.6762, lng: 139.6503 },
++      "dubai,emiratos arabes unidos": { lat: 25.2048, lng: 55.2708 }
++    };
++
++    const continentCenters = {
++      "America del Sur": { lat: -15, lng: -60 },
++      "America del Norte": { lat: 40, lng: -100 },
++      Europa: { lat: 50, lng: 15 },
++      Asia: { lat: 30, lng: 95 },
++      Africa: { lat: 5, lng: 20 },
++      Oceania: { lat: -25, lng: 135 }
++    };
++
++    const heroPackageCount = document.getElementById("heroPackageCount");
++    const packagesGrid = document.getElementById("packagesGrid");
++    const mapMarkers = document.getElementById("mapMarkers");
++    const mapList = document.getElementById("mapList");
++    const exoticGrid = document.getElementById("exoticGrid");
++    const tipsGrid = document.getElementById("tipsGrid");
++    const continentFilters = document.getElementById("continentFilters");
++    const countryGrid = document.getElementById("countryGrid");
++    const countrySearch = document.getElementById("countrySearch");
++    const adminLogin = document.getElementById("adminLogin");
++    const adminPassword = document.getElementById("adminPassword");
++    const adminLoginButton = document.getElementById("adminLoginButton");
++    const adminWizard = document.getElementById("adminWizard");
++    const wizardSteps = document.getElementById("wizardSteps");
++    const packageForm = document.getElementById("packageForm");
++    const prevStepButton = document.getElementById("prevStep");
++    const nextStepButton = document.getElementById("nextStep");
++    const resetFormButton = document.getElementById("resetForm");
++    const reviewCard = document.getElementById("reviewCard");
++    const imagePreview = document.getElementById("imagePreview");
++    const adminList = document.getElementById("adminList");
++    const detailModal = document.getElementById("detailModal");
++    const toast = document.getElementById("toast");
++
++    const fields = {
++      type: document.getElementById("promoType"),
++      title: document.getElementById("promoTitle"),
++      price: document.getElementById("promoPrice"),
++      link: document.getElementById("promoLink"),
++      startDate: document.getElementById("promoStart"),
++      endDate: document.getElementById("promoEnd"),
++      continent: document.getElementById("promoContinent"),
++      country: document.getElementById("promoCountry"),
++      city: document.getElementById("promoCity"),
++      region: document.getElementById("promoRegion"),
++      lat: document.getElementById("promoLat"),
++      lng: document.getElementById("promoLng"),
++      summary: document.getElementById("promoSummary"),
++      highlights: document.getElementById("promoHighlights"),
++      imageUrls: document.getElementById("promoImageUrls"),
++      images: document.getElementById("promoImages"),
++      replaceImages: document.getElementById("replaceImages")
++    };
++
++    function formatDateRange(startDate, endDate) {
++      if (!startDate && !endDate) return "Fechas a definir";
++      if (startDate && endDate) return startDate + " al " + endDate;
++      return startDate || endDate;
++    }
++
++    function normalizeImages(images) {
++      return (Array.isArray(images) ? images : []).filter(Boolean);
++    }
++
++    function slug(text) {
++      return (text || "")
++        .toLowerCase()
++        .normalize("NFD")
++        .replace(/[\u0300-\u036f]/g, "")
++        .replace(/[^a-z0-9]+/g, "-")
++        .replace(/^-|-$/g, "");
++    }
++
++    function getMapPosition(lat, lng) {
++      const left = ((Number(lng) + 180) / 360) * 100;
++      const top = ((90 - Number(lat)) / 180) * 100;
++      return {
++        left: Math.min(Math.max(left, 5), 95),
++        top: Math.min(Math.max(top, 10), 88)
++      };
++    }
++
++    function resolveCoords(pkg) {
++      if (pkg.lat !== "" && pkg.lng !== "" && pkg.lat !== null && pkg.lng !== null && !Number.isNaN(Number(pkg.lat)) && !Number.isNaN(Number(pkg.lng))) {
++        return { lat: Number(pkg.lat), lng: Number(pkg.lng) };
++      }
++
++      const key = slug(pkg.city) + "," + slug(pkg.country);
++      if (cityCoords[key]) return cityCoords[key];
++      return continentCenters[pkg.continent] || { lat: 0, lng: 0 };
++    }
++
++    function renderPackages() {
++      heroPackageCount.textContent = String(state.packages.length);
++
++      if (!state.packages.length) {
++        packagesGrid.innerHTML = "<div class='empty-state'>No hay promos activas todavia.</div>";
++        return;
++      }
++
++      packagesGrid.innerHTML = state.packages.map((pkg) => {
++        const images = normalizeImages(pkg.images);
++        const cover = images[0] || PLACEHOLDER_IMAGE;
++        return `
++          <article class="card">
++            <div class="card-image">
++              <img src="${cover}" alt="${pkg.title}" />
++              <div class="card-tag">${pkg.type}</div>
++            </div>
++            <div class="card-body">
++              <div class="card-meta">${pkg.city}, ${pkg.country} · ${formatDateRange(pkg.startDate, pkg.endDate)}</div>
++              <h3>${pkg.title}</h3>
++              <p>${pkg.summary || "Promo sin descripcion."}</p>
++              <ul class="card-list">
++                ${(pkg.highlights || []).slice(0, 4).map((item) => `<li>${item}</li>`).join("")}
++              </ul>
++              <div class="card-footer">
++                <div class="price">
++                  <span class="muted">desde</span>
++                  <strong>${pkg.price}</strong>
++                </div>
++                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
++                  <button class="button-ghost" type="button" data-detail="${pkg.id}">Ver detalle</button>
++                  <a class="button" href="${pkg.link}" target="_blank" rel="noreferrer">Ir al link</a>
++                </div>
++              </div>
++            </div>
++          </article>
++        `;
++      }).join("");
++    }
++
++    function renderMap() {
++      if (!state.packages.length) {
++        mapMarkers.innerHTML = "";
++        mapList.innerHTML = "<div class='empty-state'>No hay paquetes para ubicar en el mapa.</div>";
++        return;
++      }
++
++      mapMarkers.innerHTML = state.packages.map((pkg) => {
++        const coords = resolveCoords(pkg);
++        const point = getMapPosition(coords.lat, coords.lng);
++        return `
++          <button
++            class="map-pin"
++            type="button"
++            data-detail="${pkg.id}"
++            style="left:${point.left}%; top:${point.top}%;"
++            aria-label="Ver ${pkg.title}"
++          >
++            <span>${pkg.city}</span>
++          </button>
++        `;
++      }).join("");
++
++      mapList.innerHTML = state.packages.map((pkg) => `
++        <article class="map-list-item">
++          <strong>${pkg.title}</strong>
++          <span class="muted">${pkg.city}, ${pkg.country} · ${pkg.price}</span>
++          <span class="muted">${formatDateRange(pkg.startDate, pkg.endDate)}</span>
++          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
++            <button class="button-ghost" type="button" data-detail="${pkg.id}">Ver ficha</button>
++            <a class="button" href="${pkg.link}" target="_blank" rel="noreferrer">Abrir promo</a>
++          </div>
++        </article>
++      `).join("");
++    }
++
++    function renderExoticPlaces() {
++      exoticGrid.innerHTML = exoticPlaces.map((item) => `
++        <article class="card">
++          <div class="card-image">
++            <img src="${item.image}" alt="${item.title}" />
++            <div class="card-tag">Destino editorial</div>
++          </div>
++          <div class="card-body">
++            <h3>${item.title}</h3>
++            <p>${item.summary}</p>
++          </div>
++        </article>
++      `).join("");
++    }
++
++    function renderTips() {
++      tipsGrid.innerHTML = tips.map((tip) => `
++        <article class="card">
++          <div class="card-body">
++            <div class="card-meta">${tip.source}</div>
++            <h3>${tip.title}</h3>
++            <p>${tip.body}</p>
++          </div>
++        </article>
++      `).join("");
++    }
++
++    function renderContinentFilters() {
++      const continents = ["Todos", ...new Set(countries.map((item) => item.continent))];
++      continentFilters.innerHTML = continents.map((continent) => `
++        <button
++          type="button"
++          class="filter-button ${state.continentFilter === continent ? "is-active" : ""}"
++          data-continent="${continent}"
++        >
++          ${continent}
++        </button>
++      `).join("");
++    }
++
++    function filteredCountries() {
++      const term = state.countrySearch.trim().toLowerCase();
++      return countries.filter((item) => {
++        const continentMatch = state.continentFilter === "Todos" || item.continent === state.continentFilter;
++        const haystack = [item.name, item.summary, item.cities.join(" "), item.attractions.join(" ")].join(" ").toLowerCase();
++        const searchMatch = !term || haystack.includes(term);
++        return continentMatch && searchMatch;
++      });
++    }
++
++    function renderCountries() {
++      const list = filteredCountries();
++      if (!list.length) {
++        countryGrid.innerHTML = "<div class='empty-state'>No hay resultados para ese filtro.</div>";
++        return;
++      }
++
++      countryGrid.innerHTML = list.map((country) => `
++        <article class="card country-card">
++          <div style="display: flex; justify-content: space-between; gap: 16px; align-items: center;">
++            <div>
++              <div class="country-meta">${country.continent}</div>
++              <h3>${country.name}</h3>
++            </div>
++            <div class="country-flag">
++              <img src="https://flagcdn.com/w80/${country.code}.png" alt="Bandera de ${country.name}" />
++            </div>
++          </div>
++          <p>${country.summary}</p>
++          <div class="country-meta">Ciudades: ${country.cities.slice(0, 3).join(", ")}</div>
++          <div class="country-meta">Atracciones: ${country.attractions.slice(0, 2).join(", ")}</div>
++          <div>
++            <button class="button-ghost" type="button" data-country="${country.name}">Ver ficha del pais</button>
++          </div>
++        </article>
++      `).join("");
++    }
++
++    function renderWizardSteps() {
++      wizardSteps.innerHTML = wizardStepLabels.map((step) => `
++        <div class="wizard-step ${state.currentStep === step.id ? "is-current" : ""}">
++          <span>Paso ${step.id}</span>
++          <strong>${step.title}</strong>
++          <small>${step.copy}</small>
++        </div>
++      `).join("");
++
++      document.querySelectorAll(".wizard-panel").forEach((panel) => {
++        panel.classList.toggle("is-current", Number(panel.dataset.step) === state.currentStep);
++      });
++    }
++
++    function getTextLines(value) {
++      return value.split("\n").map((line) => line.trim()).filter(Boolean);
++    }
++
++    function formDataSnapshot() {
++      return {
++        type: fields.type.value.trim(),
++        title: fields.title.value.trim(),
++        price: fields.price.value.trim(),
++        link: fields.link.value.trim(),
++        startDate: fields.startDate.value,
++        endDate: fields.endDate.value,
++        continent: fields.continent.value.trim(),
++        country: fields.country.value.trim(),
++        city: fields.city.value.trim(),
++        region: fields.region.value.trim(),
++        lat: fields.lat.value,
++        lng: fields.lng.value,
++        summary: fields.summary.value.trim(),
++        highlights: getTextLines(fields.highlights.value),
++        imageUrls: getTextLines(fields.imageUrls.value)
++      };
++    }
++
++    function renderReview() {
++      const data = formDataSnapshot();
++      reviewCard.innerHTML = `
++        <div class="review-pair">
++          <strong>Promo</strong>
++          <span>${data.type || "-"} · ${data.title || "-"}</span>
++        </div>
++        <div class="review-pair">
++          <strong>Precio y fechas</strong>
++          <span>${data.price || "-"} · ${formatDateRange(data.startDate, data.endDate)}</span>
++        </div>
++        <div class="review-pair">
++          <strong>Destino</strong>
++          <span>${data.city || "-"}, ${data.country || "-"} · ${data.continent || "-"}</span>
++        </div>
++        <div class="review-pair">
++          <strong>Link</strong>
++          <span>${data.link || "-"}</span>
++        </div>
++        <div class="review-pair">
++          <strong>Descripcion</strong>
++          <span>${data.summary || "Sin descripcion"}</span>
++        </div>
++        <div class="review-pair">
++          <strong>Highlights</strong>
++          <span>${data.highlights.length ? data.highlights.join(" · ") : "Sin highlights"}</span>
++        </div>
++        <div class="review-pair">
++          <strong>Fotos cargadas</strong>
++          <span>${imagePreview.querySelectorAll("img").length} imagenes en preview</span>
++        </div>
++      `;
++    }
++
++    async function fileToDataUrl(file) {
++      return await new Promise((resolve, reject) => {
++        const reader = new FileReader();
++        reader.onload = () => resolve(String(reader.result || ""));
++        reader.onerror = () => reject(new Error("No se pudo leer la imagen."));
++        reader.readAsDataURL(file);
++      });
++    }
++
++    async function buildPreviewImages() {
++      const urlImages = getTextLines(fields.imageUrls.value);
++      const fileImages = await Promise.all(Array.from(fields.images.files || []).map(fileToDataUrl));
++      const baseImages = fields.replaceImages.checked ? [] : state.editingImages;
++      const images = [...baseImages, ...urlImages, ...fileImages].filter(Boolean);
++      const uniqueImages = [...new Set(images)];
++
++      imagePreview.innerHTML = uniqueImages.length
++        ? uniqueImages.map((src) => `<img src="${src}" alt="Preview promo" />`).join("")
++        : "<div class='empty-state'>Sin imagenes todavia.</div>";
++
++      renderReview();
++      return uniqueImages;
++    }
++
++    function validateStep(step) {
++      const checks = {
++        1: [fields.type, fields.title, fields.price, fields.link],
++        2: [fields.continent, fields.country, fields.city],
++        3: [fields.summary]
++      };
++
++      const requiredFields = checks[step] || [];
++      const invalid = requiredFields.find((field) => !field.value.trim());
++      if (invalid) {
++        invalid.focus();
++        showToast("Completa los campos requeridos antes de seguir.");
++        return false;
++      }
++      return true;
++    }
++
++    function moveStep(direction) {
++      const next = state.currentStep + direction;
++      if (direction > 0 && !validateStep(state.currentStep)) return;
++      state.currentStep = Math.min(Math.max(next, 1), 4);
++      renderWizardSteps();
++      renderReview();
++    }
++
++    function resetForm() {
++      packageForm.reset();
++      fields.type.value = "Paquete";
++      fields.continent.value = "America del Sur";
++      imagePreview.innerHTML = "<div class='empty-state'>Sin imagenes todavia.</div>";
++      state.currentStep = 1;
++      state.editingId = null;
++      state.editingImages = [];
++      renderWizardSteps();
++      renderReview();
++    }
++
++    async function collectPackagePayload() {
++      const snapshot = formDataSnapshot();
++      const previewImages = await buildPreviewImages();
++      const coords = resolveCoords({
++        city: snapshot.city,
++        country: snapshot.country,
++        continent: snapshot.continent,
++        lat: snapshot.lat,
++        lng: snapshot.lng
++      });
++
++      return {
++        id: state.editingId || crypto.randomUUID(),
++        type: snapshot.type,
++        title: snapshot.title,
++        price: snapshot.price,
++        link: snapshot.link,
++        startDate: snapshot.startDate,
++        endDate: snapshot.endDate,
++        continent: snapshot.continent,
++        country: snapshot.country,
++        city: snapshot.city,
++        region: snapshot.region,
++        lat: snapshot.lat === "" ? coords.lat : Number(snapshot.lat),
++        lng: snapshot.lng === "" ? coords.lng : Number(snapshot.lng),
++        summary: snapshot.summary,
++        highlights: snapshot.highlights,
++        images: previewImages
++      };
++    }
++
++    function renderAdminList() {
++      if (!state.packages.length) {
++        adminList.innerHTML = "<div class='empty-state'>No hay promos cargadas.</div>";
++        return;
++      }
++
++      adminList.innerHTML = state.packages.map((pkg) => `
++        <article class="admin-item">
++          <img src="${normalizeImages(pkg.images)[0] || PLACEHOLDER_IMAGE}" alt="${pkg.title}" />
++          <div class="card-meta">${pkg.type} · ${pkg.city}, ${pkg.country}</div>
++          <h3 style="margin: 0;">${pkg.title}</h3>
++          <div class="muted">${formatDateRange(pkg.startDate, pkg.endDate)}</div>
++          <div class="muted">${pkg.price}</div>
++          <div class="admin-item__actions">
++            <button class="button-small edit" type="button" data-edit="${pkg.id}">Editar</button>
++            <button class="button-small delete" type="button" data-delete="${pkg.id}">Borrar</button>
++          </div>
++        </article>
++      `).join("");
++    }
++
++    function fillForm(pkg) {
++      fields.type.value = pkg.type;
++      fields.title.value = pkg.title;
++      fields.price.value = pkg.price;
++      fields.link.value = pkg.link;
++      fields.startDate.value = pkg.startDate || "";
++      fields.endDate.value = pkg.endDate || "";
++      fields.continent.value = pkg.continent;
++      fields.country.value = pkg.country;
++      fields.city.value = pkg.city;
++      fields.region.value = pkg.region || "";
++      fields.lat.value = pkg.lat ?? "";
++      fields.lng.value = pkg.lng ?? "";
++      fields.summary.value = pkg.summary || "";
++      fields.highlights.value = (pkg.highlights || []).join("\n");
++      fields.imageUrls.value = normalizeImages(pkg.images).filter((src) => src.startsWith("http")).join("\n");
++      fields.replaceImages.checked = false;
++      state.editingId = pkg.id;
++      state.editingImages = normalizeImages(pkg.images);
++      state.currentStep = 1;
++      renderWizardSteps();
++      buildPreviewImages();
++      document.getElementById("admin").scrollIntoView({ behavior: "smooth", block: "start" });
++    }
++
++    function deletePackage(id) {
++      state.packages = state.packages.filter((pkg) => pkg.id !== id);
++      if (state.editingId === id) resetForm();
++      renderAll();
++      showToast("Promo eliminada.");
++    }
++
++    function openPackageDetail(id) {
++      const pkg = state.packages.find((item) => item.id === id);
++      if (!pkg) return;
++
++      const images = normalizeImages(pkg.images);
++      detailModal.innerHTML = `
++        <div class="modal-card" style="position: relative;">
++          <button class="modal-close" type="button" data-close-modal>×</button>
++          <img class="modal-cover" src="${images[0] || PLACEHOLDER_IMAGE}" alt="${pkg.title}" />
++          <div class="modal-content">
++            <div class="card-meta">${pkg.type} · ${pkg.city}, ${pkg.country} · ${pkg.region || "Destino principal"}</div>
++            <h3 style="font-size: clamp(2.4rem, 4vw, 3.8rem);">${pkg.title}</h3>
++            <p class="muted" style="margin: 0;">${formatDateRange(pkg.startDate, pkg.endDate)} · ${pkg.price}</p>
++            <p style="line-height: 1.8; margin: 0;">${pkg.summary || "Sin descripcion."}</p>
++            <div class="review-card">
++              <div class="review-pair">
++                <strong>Highlights</strong>
++                <span>${(pkg.highlights || []).join(" · ") || "Sin highlights"}</span>
++              </div>
++              <div class="review-pair">
++                <strong>Link</strong>
++                <span>${pkg.link}</span>
++              </div>
++            </div>
++            <div class="preview-grid">
++              ${images.map((src) => `<img src="${src}" alt="${pkg.title}" />`).join("")}
++            </div>
++            <div>
++              <a class="button" href="${pkg.link}" target="_blank" rel="noreferrer">Ir a la promo</a>
++            </div>
++          </div>
++        </div>
++      `;
++      detailModal.classList.add("is-open");
++      detailModal.setAttribute("aria-hidden", "false");
++    }
++
++    function openCountryDetail(countryName) {
++      const country = countries.find((item) => item.name === countryName);
++      if (!country) return;
++
++      detailModal.innerHTML = `
++        <div class="modal-card" style="position: relative;">
++          <button class="modal-close" type="button" data-close-modal>×</button>
++          <img class="modal-cover" src="${country.image}" alt="${country.name}" />
++          <div class="modal-content">
++            <div style="display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap;">
++              <div>
++                <div class="card-meta">${country.continent}</div>
++                <h3 style="font-size: clamp(2.4rem, 4vw, 3.8rem);">${country.name}</h3>
++              </div>
++              <div class="country-flag">
++                <img src="https://flagcdn.com/w160/${country.code}.png" alt="Bandera de ${country.name}" />
++              </div>
++            </div>
++            <p style="line-height: 1.8; margin: 0;">${country.summary}</p>
++            <div class="review-card">
++              <div class="review-pair">
++                <strong>Principales ciudades</strong>
++                <span>${country.cities.join(" · ")}</span>
++              </div>
++              <div class="review-pair">
++                <strong>Atracciones</strong>
++                <span>${country.attractions.join(" · ")}</span>
++              </div>
++            </div>
++          </div>
++        </div>
++      `;
++      detailModal.classList.add("is-open");
++      detailModal.setAttribute("aria-hidden", "false");
++    }
++
++    function closeModal() {
++      detailModal.classList.remove("is-open");
++      detailModal.setAttribute("aria-hidden", "true");
++      detailModal.innerHTML = "";
++    }
++
++    function showToast(message) {
++      toast.textContent = message;
++      toast.classList.add("is-open");
++      window.clearTimeout(showToast.timer);
++      showToast.timer = window.setTimeout(() => {
++        toast.classList.remove("is-open");
++      }, 2400);
++    }
++
++    function unlockAdmin() {
++      if (adminPassword.value !== ADMIN_PASSWORD) {
++        showToast("Password incorrecta.");
++        return;
++      }
++
++      state.adminUnlocked = true;
++      adminLogin.style.display = "none";
++      adminWizard.classList.add("is-open");
++      renderAdminList();
++      showToast("Admin desbloqueado.");
++    }
++
++    function renderAll() {
++      renderPackages();
++      renderMap();
++      renderExoticPlaces();
++      renderTips();
++      renderContinentFilters();
++      renderCountries();
++      if (state.adminUnlocked) renderAdminList();
++      renderReview();
++    }
++
++    adminLoginButton.addEventListener("click", unlockAdmin);
++    adminPassword.addEventListener("keydown", (event) => {
++      if (event.key === "Enter") unlockAdmin();
++    });
++
++    prevStepButton.addEventListener("click", () => moveStep(-1));
++    nextStepButton.addEventListener("click", () => moveStep(1));
++    resetFormButton.addEventListener("click", resetForm);
++    fields.imageUrls.addEventListener("input", () => buildPreviewImages());
++    fields.images.addEventListener("change", () => buildPreviewImages());
++    fields.replaceImages.addEventListener("change", () => buildPreviewImages());
++    countrySearch.addEventListener("input", (event) => {
++      state.countrySearch = event.target.value;
++      renderCountries();
++    });
++
++    continentFilters.addEventListener("click", (event) => {
++      const button = event.target.closest("[data-continent]");
++      if (!button) return;
++      state.continentFilter = button.dataset.continent;
++      renderContinentFilters();
++      renderCountries();
++    });
++
++    document.body.addEventListener("click", (event) => {
++      const detailTrigger = event.target.closest("[data-detail]");
++      if (detailTrigger) {
++        openPackageDetail(detailTrigger.dataset.detail);
++        return;
++      }
++
++      const countryTrigger = event.target.closest("[data-country]");
++      if (countryTrigger) {
++        openCountryDetail(countryTrigger.dataset.country);
++        return;
++      }
++
++      const editTrigger = event.target.closest("[data-edit]");
++      if (editTrigger) {
++        const pkg = state.packages.find((item) => item.id === editTrigger.dataset.edit);
++        if (pkg) fillForm(pkg);
++        return;
++      }
++
++      const deleteTrigger = event.target.closest("[data-delete]");
++      if (deleteTrigger) {
++        deletePackage(deleteTrigger.dataset.delete);
++        return;
++      }
++
++      if (event.target.matches("[data-close-modal]") || event.target === detailModal) {
++        closeModal();
++      }
++    });
++
++    packageForm.addEventListener("submit", async (event) => {
++      event.preventDefault();
++
++      for (const step of [1, 2, 3]) {
++        if (!validateStep(step)) {
++          state.currentStep = step;
++          renderWizardSteps();
++          return;
++        }
++      }
++
++      const payload = await collectPackagePayload();
++      const index = state.packages.findIndex((pkg) => pkg.id === payload.id);
++      if (index >= 0) {
++        state.packages[index] = payload;
++      } else {
++        state.packages.unshift(payload);
++      }
++
++      resetForm();
++      renderAll();
++      showToast(index >= 0 ? "Promo actualizada." : "Promo creada.");
++    });
++
++    document.addEventListener("keydown", (event) => {
++      if (event.key === "Escape" && detailModal.classList.contains("is-open")) {
++        closeModal();
++      }
++    });
++
++    renderWizardSteps();
++    resetForm();
++    renderAll();
++  </script>
++</body>
++</html>

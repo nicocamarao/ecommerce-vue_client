@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuantumOS Lite</title>
+  <style>
+    :root {
+      --bg: #061018;
+      --panel: rgba(10, 20, 32, 0.92);
+      --panel-2: rgba(9, 26, 40, 0.95);
+      --line: #1ee6d3;
+      --line-soft: rgba(30, 230, 211, 0.25);
+      --accent: #8a7dff;
+      --accent-2: #52ffa8;
+      --text: #d9f8ff;
+      --muted: #84b8c2;
+      --danger: #ff7d8c;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(82,255,168,0.08), transparent 25%),
+        radial-gradient(circle at 85% 15%, rgba(138,125,255,0.12), transparent 25%),
+        linear-gradient(180deg, #07121c 0%, #04090f 100%);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .scanlines::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(rgba(255,255,255,0.03), rgba(255,255,255,0.0) 2px);
+      background-size: 100% 4px;
+      opacity: 0.08;
+      mix-blend-mode: screen;
+    }
+
+    .desktop {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 56px 1fr 48px;
+    }
+
+    .topbar, .taskbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(5, 14, 22, 0.88);
+      border-bottom: 1px solid rgba(30, 230, 211, 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    .taskbar {
+      border-top: 1px solid rgba(30, 230, 211, 0.15);
+      border-bottom: none;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: .4px;
+    }
+
+    .brand .logo {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(30,230,211,.16), rgba(138,125,255,.22));
+      border: 1px solid rgba(30,230,211,.35);
+      box-shadow: inset 0 0 12px rgba(30,230,211,.15);
+    }
+
+    .statusbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(30,230,211,.25);
+      background: rgba(8, 20, 31, 0.8);
+    }
+
+    .workspace {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      width: 220px;
+      padding: 14px;
+      border-radius: 22px;
+      background: rgba(6, 18, 28, 0.78);
+      border: 1px solid rgba(30,230,211,.18);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      z-index: 1;
+    }
+
+    .sidebar h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .app-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .app-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(180deg, rgba(10,24,37,.9), rgba(8,17,28,.95));
+      color: var(--text);
+      border: 1px solid rgba(30,230,211,.18);
+      border-radius: 16px;
+      cursor: pointer;
+      text-align: left;
+      transition: .2s ease;
+    }
+
+    .app-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(82,255,168,.38);
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+
+    .app-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(138,125,255,.24), rgba(30,230,211,.18));
+      border: 1px solid rgba(30,230,211,.28);
+      font-size: 20px;
+    }
+
+    .app-title { font-weight: 700; }
+    .app-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .window {
+      position: absolute;
+      background: var(--panel);
+      border: 1px solid rgba(30,230,211,.18);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .window-header {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px 0 16px;
+      background: linear-gradient(180deg, rgba(13,28,43,.96), rgba(7,16,26,.92));
+      border-bottom: 1px solid rgba(30,230,211,.16);
+      cursor: move;
+      user-select: none;
+    }
+
+    .window-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      opacity: .9;
+    }
+    .dot.close { background: #ff6b75; }
+    .dot.min { background: #ffca57; }
+    .dot.max { background: #2ed573; }
+
+    .window-body {
+      height: calc(100% - 48px);
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .card {
+      background: rgba(7, 19, 30, 0.76);
+      border: 1px solid rgba(30,230,211,.14);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .card + .card { margin-top: 12px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      background: rgba(5, 14, 22, .92);
+      color: var(--text);
+      border: 1px solid rgba(30,230,211,.16);
+      border-radius: 14px;
+      padding: 12px 13px;
+      font: inherit;
+      outline: none;
+    }
+
+    textarea { min-height: 110px; resize: vertical; }
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(82,255,168,.45);
+      box-shadow: 0 0 0 3px rgba(82,255,168,.12);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(30,230,211,.18);
+      background: linear-gradient(180deg, rgba(13,32,47,.96), rgba(7,19,30,.96));
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: .2s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary {
+      border-color: rgba(82,255,168,.35);
+      box-shadow: inset 0 0 20px rgba(82,255,168,.07);
+    }
+
+    .btn.secondary {
+      border-color: rgba(138,125,255,.3);
+      box-shadow: inset 0 0 20px rgba(138,125,255,.06);
+    }
+
+    .terminal {
+      background: #03080d;
+      color: #bcffe0;
+      border: 1px solid rgba(82,255,168,.15);
+      border-radius: 18px;
+      padding: 14px;
+      min-height: 210px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre-wrap;
+      line-height: 1.55;
+      box-shadow: inset 0 0 40px rgba(0,0,0,.35);
+    }
+
+    .bars {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 66px 1fr 58px;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .bar {
+      height: 12px;
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(30,230,211,.08);
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--line), var(--accent-2));
+      border-radius: inherit;
+      transition: width .35s ease;
+      box-shadow: 0 0 18px rgba(82,255,168,.22);
+    }
+
+    .list-box {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .num-chip {
+      border: 1px solid rgba(30,230,211,.15);
+      border-radius: 16px;
+      padding: 12px 8px;
+      text-align: center;
+      background: rgba(8, 18, 28, .84);
+      transition: .25s ease;
+    }
+
+    .num-chip.active {
+      border-color: rgba(82,255,168,.5);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(82,255,168,.08);
+    }
+
+    .num-chip.winner {
+      border-color: rgba(255, 214, 102, .6);
+      box-shadow: 0 0 0 2px rgba(255, 214, 102, .12), 0 10px 28px rgba(255, 214, 102, .12);
+    }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+    .tiny { font-size: 12px; }
+    .title-xl { font-size: 24px; margin: 0 0 6px; }
+    .subtitle { color: var(--muted); margin: 0; line-height: 1.5; }
+
+    .task-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .task-pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(30,230,211,.14);
+      background: rgba(6, 16, 24, .84);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .help-box {
+      background: rgba(8, 18, 28, .75);
+      border: 1px dashed rgba(30,230,211,.18);
+      border-radius: 16px;
+      padding: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .sidebar { width: 190px; }
+    }
+  </style>
+</head>
+<body class="scanlines">
+  <div class="desktop">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">⚛️</div>
+        <div>QuantumOS Lite</div>
+      </div>
+      <div class="statusbar">
+        <div class="pill">Qubits simulados: 5</div>
+        <div class="pill">Estado: listo</div>
+        <div class="pill" id="clock"></div>
+      </div>
+    </div>
+
+    <div class="workspace" id="workspace">
+      <aside class="sidebar card">
+        <h3>Aplicaciones</h3>
+        <div class="app-grid">
+          <button class="app-btn" data-open="welcomeWindow">
+            <div class="app-icon">🖥️</div>
+            <div>
+              <div class="app-title">Inicio</div>
+              <div class="app-sub">Visión general del sistema</div>
+            </div>
+          </button>
+          <button class="app-btn" data-open="cesarWindow">
+            <div class="app-icon">🔐</div>
+            <div>
+              <div class="app-title">Romper César</div>
+              <div class="app-sub">Modo clásico y cuántico</div>
+            </div>
+          </button>
+          <button class="app-btn" data-open="minimoWindow">
+            <div class="app-icon">🔎</div>
+            <div>
+              <div class="app-title">Buscar mínimo</div>
+              <div class="app-sub">Lista + amplificación visual</div>
+            </div>
+          </button>
+          <button class="app-btn" data-open="consoleWindow">
+            <div class="app-icon">💻</div>
+            <div>
+              <div class="app-title">QConsola</div>
+              <div class="app-sub">Lanza tareas con comandos</div>
+            </div>
+          </button>
+        </div>
+      </aside>
+
+      <section class="window" id="welcomeWindow" style="left:260px; top:34px; width:540px; height:355px; z-index:4;">
+        <div class="window-header">
+          <div class="window-title"><span>🖥️</span> <span>Inicio del sistema</span></div>
+          <div class="window-controls">
+            <button class="dot min" title="Minimizar"></button>
+            <button class="dot max" title="Traer al frente"></button>
+            <button class="dot close" title="Cerrar"></button>
+          </div>
+        </div>
+        <div class="window-body">
+          <h1 class="title-xl">Bienvenido a QuantumOS Lite</h1>
+          <p class="subtitle">Una simulación HTML5 en español de un sistema operativo educativo inspirado en computación cuántica. Aquí puedes ejecutar dos tareas: romper un cifrado César y encontrar el número menor de una lista con una visualización inspirada en superposición, oráculo y amplificación.</p>
+          <div class="card" style="margin-top:14px;">
+            <div class="task-buttons">
+              <div class="task-pill">🎚️ Superposición</div>
+              <div class="task-pill">🧠 Oráculo</div>
+              <div class="task-pill">📈 Amplificación</div>
+              <div class="task-pill">📏 Medición</div>
+            </div>
+            <p class="small muted" style="margin:12px 0 0;">Abre una app desde la izquierda o usa la QConsola con comandos como <code>run cesar --texto KHOOR</code> o <code>run minimo --lista 15,3,22,9,1,18</code>.</p>
+          </div>
+          <div class="help-box" style="margin-top:14px;">
+            Sugerencia: prueba el texto <b>KHOOR</b> con palabra objetivo <b>HELLO</b> para ver cómo una clave gana peso en el modo cuántico. En la app de mínimo, usa una lista como <b>15, 3, 22, 9, 1, 18</b>.
+          </div>
+        </div>
+      </section>
+
+      <section class="window" id="cesarWindow" style="left:360px; top:110px; width:780px; height:540px; z-index:2; display:none;">
+        <div class="window-header">
+          <div class="window-title"><span>🔐</span> <span>CryptoBreaker · Romper César</span></div>
+          <div class="window-controls">
+            <button class="dot min" title="Minimizar"></button>
+            <button class="dot max" title="Traer al frente"></button>
+            <button class="dot close" title="Cerrar"></button>
+          </div>
+        </div>
+        <div class="window-body">
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <label for="cesarExample">Ejemplo guiado</label>
+                <select id="cesarExample"></select>
+                <div id="cesarExampleDescription" class="small muted" style="margin-top:10px;"></div>
+                <div style="height:12px"></div>
+                <label for="cesarInput">Texto cifrado</label>
+                <input id="cesarInput" value="KHOOR" />
+                <div style="height:10px"></div>
+                <label for="cesarTarget">Texto objetivo esperado</label>
+                <input id="cesarTarget" value="HELLO" />
+                <div style="height:10px"></div>
+                <label for="cesarAlphabet">Alfabeto</label>
+                <input id="cesarAlphabet" value="ABCDEFGHIJKLMNOPQRSTUVWXYZ" />
+                <div class="btn-row">
+                  <button class="btn primary" id="runCesarClassic">▶ Ejecutar modo clásico</button>
+                  <button class="btn secondary" id="runCesarQuantum">⚛ Ejecutar modo cuántico</button>
+                </div>
+              </div>
+              <div class="card">
+                <label>Consola de ejecución</label>
+                <div class="terminal" id="cesarTerminal">Esperando tarea...</div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <label>Amplitud visual por clave</label>
+                <div class="bars" id="cesarBars"></div>
+              </div>
+              <div class="card">
+                <label>Resultado final</label>
+                <div id="cesarResult" class="small muted">Aún no se ha ejecutado ninguna simulación.</div>
+              </div>
+              <div class="help-box">
+                En modo clásico se prueban claves una por una. En modo cuántico se simula: preparación con Hadamard, verificación en superposición, marca de la clave correcta y amplificación progresiva hasta la medición final.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="window" id="minimoWindow" style="left:300px; top:78px; width:860px; height:570px; z-index:3; display:none;">
+        <div class="window-header">
+          <div class="window-title"><span>🔎</span> <span>MinFinder · Buscar mínimo</span></div>
+          <div class="window-controls">
+            <button class="dot min" title="Minimizar"></button>
+            <button class="dot max" title="Traer al frente"></button>
+            <button class="dot close" title="Cerrar"></button>
+          </div>
+        </div>
+        <div class="window-body">
+          <div class="grid-2">
+            <div>
+              <div class="card">
+                <label for="minExample">Ejemplo guiado</label>
+                <select id="minExample"></select>
+                <div id="minExampleDescription" class="small muted" style="margin-top:10px;"></div>
+                <div style="height:12px"></div>
+                <label for="minInput">Lista de números</label>
+                <textarea id="minInput">15, 3, 22, 9, 1, 18</textarea>
+                <div class="btn-row">
+                  <button class="btn primary" id="runMinClassic">▶ Buscar mínimo clásico</button>
+                  <button class="btn secondary" id="runMinQuantum">⚛ Buscar mínimo estilo cuántico</button>
+                </div>
+              </div>
+              <div class="card">
+                <label>Consola de ejecución</label>
+                <div class="terminal" id="minTerminal">Esperando tarea...</div>
+              </div>
+            </div>
+            <div>
+              <div class="card">
+                <label>Lista visual</label>
+                <div id="minListVisual" class="list-box"></div>
+              </div>
+              <div class="card">
+                <label>Amplitud visual por posición</label>
+                <div class="bars" id="minBars"></div>
+              </div>
+              <div class="card">
+                <label>Resultado final</label>
+                <div id="minResult" class="small muted">Aún no se ha ejecutado ninguna simulación.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="window" id="consoleWindow" style="left:520px; top:180px; width:600px; height:370px; z-index:5; display:none;">
+        <div class="window-header">
+          <div class="window-title"><span>💻</span> <span>QConsola</span></div>
+          <div class="window-controls">
+            <button class="dot min" title="Minimizar"></button>
+            <button class="dot max" title="Traer al frente"></button>
+            <button class="dot close" title="Cerrar"></button>
+          </div>
+        </div>
+        <div class="window-body">
+          <div class="card">
+            <label for="consoleInput">Comando</label>
+            <input id="consoleInput" value="run cesar --texto KHOOR" />
+            <div class="btn-row">
+              <button class="btn primary" id="runCommand">▶ Ejecutar</button>
+            </div>
+          </div>
+          <div class="card">
+            <label>Salida</label>
+            <div class="terminal" id="consoleOutput">Comandos disponibles:
+- run cesar --texto KHOOR
+- run minimo --lista 15,3,22,9,1,18
+- open cesar
+- open minimo</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="taskbar">
+      <div class="task-buttons">
+        <button class="btn" data-open="welcomeWindow">Inicio</button>
+        <button class="btn" data-open="cesarWindow">Romper César</button>
+        <button class="btn" data-open="minimoWindow">Buscar mínimo</button>
+        <button class="btn" data-open="consoleWindow">QConsola</button>
+      </div>
+      <div class="tiny muted">QuantumOS Lite · Simulación educativa en un solo HTML</div>
+    </div>
+  </div>
+
+  <script>
+    const workspace = document.getElementById('workspace');
+    let topZ = 10;
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    function bringToFront(win) {
+      topZ += 1;
+      win.style.zIndex = topZ;
+    }
+
+    function setupWindows() {
+      document.querySelectorAll('.window').forEach(win => {
+        const header = win.querySelector('.window-header');
+        const closeBtn = win.querySelector('.dot.close');
+        const maxBtn = win.querySelector('.dot.max');
+        const minBtn = win.querySelector('.dot.min');
+
+        let dragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        header.addEventListener('mousedown', e => {
+          bringToFront(win);
+          dragging = true;
+          const rect = win.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+        });
+
+        document.addEventListener('mousemove', e => {
+          if (!dragging) return;
+          const wr = workspace.getBoundingClientRect();
+          let left = e.clientX - wr.left - offsetX;
+          let top = e.clientY - wr.top - offsetY;
+          left = Math.max(0, Math.min(left, wr.width - win.offsetWidth));
+          top = Math.max(0, Math.min(top, wr.height - win.offsetHeight));
+          win.style.left = left + 'px';
+          win.style.top = top + 'px';
+        });
+
+        document.addEventListener('mouseup', () => dragging = false);
+
+        win.addEventListener('mousedown', () => bringToFront(win));
+        closeBtn.addEventListener('click', () => win.style.display = 'none');
+        maxBtn.addEventListener('click', () => bringToFront(win));
+        minBtn.addEventListener('click', () => win.style.display = 'none');
+      });
+    }
+    setupWindows();
+
+    function openWindow(id) {
+      const win = document.getElementById(id);
+      if (!win) return;
+      win.style.display = 'block';
+      bringToFront(win);
+    }
+
+    document.querySelectorAll('[data-open]').forEach(btn => {
+      btn.addEventListener('click', () => openWindow(btn.dataset.open));
+    });
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function buildBars(container, items, formatter = v => Math.round(v * 100) + '%') {
+      container.innerHTML = '';
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'bar-row';
+        row.innerHTML = `
+          <div>${item.label}</div>
+          <div class="bar"><div class="bar-fill" style="width:${Math.max(2, item.value * 100)}%"></div></div>
+          <div>${formatter(item.value)}</div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function caesarDecrypt(text, shift, alphabet) {
+      const chars = alphabet.split('');
+      const size = chars.length;
+      const upper = text.toUpperCase();
+      let out = '';
+      for (const ch of upper) {
+        const idx = chars.indexOf(ch);
+        if (idx === -1) { out += ch; continue; }
+        let next = (idx - shift) % size;
+        if (next < 0) next += size;
+        out += chars[next];
+      }
+      return out;
+    }
+
+    const CESAR_EXAMPLES = [
+      {
+        label: 'Ejemplo 1 · Saludo básico',
+        text: 'KHOOR',
+        target: 'HELLO',
+        alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        description: 'Caso introductorio: una sola palabra para ver con claridad cómo la clave 3 descifra HELLO.'
+      },
+      {
+        label: 'Ejemplo 2 · Mensaje corto',
+        text: 'PXQGR',
+        target: 'MUNDO',
+        alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        description: 'Ejemplo simple en español para mostrar que el método funciona igual con otro objetivo y la misma rotación.'
+      },
+      {
+        label: 'Ejemplo 3 · Tema de seguridad',
+        text: 'VHJXULGDG',
+        target: 'SEGURIDAD',
+        alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        description: 'Palabra relacionada con ciberseguridad. Sirve para ver el proceso en un término más largo.'
+      },
+      {
+        label: 'Ejemplo 4 · Concepto científico',
+        text: 'FLHQFLD FXDQWLFD',
+        target: 'CIENCIA CUANTICA',
+        alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        description: 'Incluye espacio entre palabras para demostrar que los caracteres no cifrados se conservan.'
+      },
+      {
+        label: 'Ejemplo 5 · Pensamiento algorítmico',
+        text: 'DOJRULWPR',
+        target: 'ALGORITMO',
+        alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        description: 'Ejemplo útil para conectar el cifrado César con vocabulario de programación y lógica.'
+      }
+    ];
+
+    const MIN_EXAMPLES = [
+      {
+        label: 'Ejemplo 1 · Lista base',
+        values: '15, 3, 22, 9, 1, 18',
+        description: 'Caso inicial para entender cómo el mínimo va cambiando durante el recorrido.'
+      },
+      {
+        label: 'Ejemplo 2 · Puntajes de clase',
+        values: '42, 17, 58, 6, 31, 23',
+        description: 'Simula una lista de puntajes donde el algoritmo detecta rápidamente el valor más bajo.'
+      },
+      {
+        label: 'Ejemplo 3 · Temperaturas con negativos',
+        values: '-2, 4, 7, -9, 3, 0',
+        description: 'Muestra que el comparador también funciona con números negativos y cero.'
+      },
+      {
+        label: 'Ejemplo 4 · Medidas de sensores',
+        values: '120, 95, 110, 87, 132, 90',
+        description: 'Ejemplo con valores altos para representar mediciones reales y ver la amplificación del menor.'
+      },
+      {
+        label: 'Ejemplo 5 · Empate en el mínimo',
+        values: '8, 8, 3, 12, 5, 3',
+        description: 'Hay dos mínimos iguales. La simulación resalta la primera aparición, útil para discutir empates.'
+      }
+    ];
+
+    function resetCesarState(message = 'Esperando tarea...') {
+      const terminal = document.getElementById('cesarTerminal');
+      const result = document.getElementById('cesarResult');
+      const alphabet = document.getElementById('cesarAlphabet').value.trim().toUpperCase() || 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const size = Math.max(alphabet.length, 1);
+      terminal.textContent = message;
+      result.textContent = 'Aún no se ha ejecutado ninguna simulación.';
+      buildBars(
+        document.getElementById('cesarBars'),
+        Array.from({ length: size }, (_, i) => ({ label: 'k=' + i, value: 1 / size }))
+      );
+    }
+
+    function resetMinState(message = 'Esperando tarea...') {
+      const terminal = document.getElementById('minTerminal');
+      const result = document.getElementById('minResult');
+      const list = parseNumberList(document.getElementById('minInput').value);
+      terminal.textContent = message;
+      result.textContent = 'Aún no se ha ejecutado ninguna simulación.';
+      renderMinList(list);
+      if (!list.length) {
+        document.getElementById('minBars').innerHTML = '';
+        return;
+      }
+      buildBars(
+        document.getElementById('minBars'),
+        list.map((_, i, arr) => ({ label: 'p=' + i, value: 1 / arr.length }))
+      );
+    }
+
+    function populateExampleSelect(selectId, examples) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '';
+      examples.forEach((example, index) => {
+        const option = document.createElement('option');
+        option.value = String(index);
+        option.textContent = example.label;
+        select.appendChild(option);
+      });
+    }
+
+    function applyCesarExample(index) {
+      const example = CESAR_EXAMPLES[index] || CESAR_EXAMPLES[0];
+      document.getElementById('cesarInput').value = example.text;
+      document.getElementById('cesarTarget').value = example.target;
+      document.getElementById('cesarAlphabet').value = example.alphabet;
+      document.getElementById('cesarExampleDescription').textContent = example.description;
+      resetCesarState('Ejemplo cargado. Ejecuta el modo clásico o cuántico para comparar el proceso.\n');
+    }
+
+    function applyMinExample(index) {
+      const example = MIN_EXAMPLES[index] || MIN_EXAMPLES[0];
+      document.getElementById('minInput').value = example.values;
+      document.getElementById('minExampleDescription').textContent = example.description;
+      resetMinState('Ejemplo cargado. Ejecuta el modo clásico o cuántico para observar la búsqueda del mínimo.\n');
+    }
+
+    async function runCesarClassic(text, target, alphabet) {
+      openWindow('cesarWindow');
+      const terminal = document.getElementById('cesarTerminal');
+      const result = document.getElementById('cesarResult');
+      const bars = document.getElementById('cesarBars');
+      const size = alphabet.length;
+      terminal.textContent = 'Inicializando búsqueda clásica...\n';
+      let amplitudes = Array.from({ length: size }, (_, i) => ({ label: 'k=' + i, value: 1 / size }));
+      buildBars(bars, amplitudes);
+
+      let found = null;
+      for (let k = 0; k < size; k++) {
+        const out = caesarDecrypt(text, k, alphabet);
+        terminal.textContent += `Probando clave ${k} -> ${out}\n`;
+        amplitudes = amplitudes.map((a, i) => ({ ...a, value: i === k ? 0.75 : 0.05 }));
+        buildBars(bars, amplitudes, v => (v * 100).toFixed(0) + '%');
+        if (out === target) {
+          found = { key: k, out };
+          terminal.textContent += `\nCoincidencia encontrada. La clave correcta es ${k}.\n`;
+          break;
+        }
+        await sleep(220);
+      }
+
+      if (found) {
+        result.innerHTML = `<b>Modo clásico finalizado.</b><br>Clave encontrada: <b>${found.key}</b><br>Texto descifrado: <b>${found.out}</b>`;
+      } else {
+        result.innerHTML = `<b>No se encontró coincidencia exacta</b> con el texto objetivo.`;
+      }
+    }
+
+    async function runCesarQuantum(text, target, alphabet) {
+      openWindow('cesarWindow');
+      const terminal = document.getElementById('cesarTerminal');
+      const result = document.getElementById('cesarResult');
+      const bars = document.getElementById('cesarBars');
+      const size = alphabet.length;
+      const matchKey = Array.from({ length: size }, (_, k) => ({ k, out: caesarDecrypt(text, k, alphabet) })).find(x => x.out === target)?.k;
+
+      terminal.textContent = 'Inicializando QuantumOS Lite...\n';
+      terminal.textContent += 'Aplicando Hadamard al registro de claves...\n';
+      let probs = Array.from({ length: size }, (_, i) => ({ label: 'k=' + i, value: 1 / size }));
+      buildBars(bars, probs);
+      await sleep(500);
+
+      if (matchKey == null) {
+        terminal.textContent += 'El oráculo no encontró una coincidencia exacta para el texto objetivo.\n';
+        result.innerHTML = `<b>Sin coincidencia exacta.</b><br>Prueba otro texto objetivo.`;
+        return;
+      }
+
+      terminal.textContent += `Oráculo preparado. La clave que produce ${target} será marcada internamente.\n`;
+      for (let iter = 1; iter <= 3; iter++) {
+        terminal.textContent += `\nIteración ${iter}:\n`;
+        terminal.textContent += '- Ejecutando oráculo en superposición...\n';
+        terminal.textContent += `- La clave k=${matchKey} queda marcada por producir ${target}.\n`;
+        terminal.textContent += '- Aplicando amplificación...\n';
+
+        const boost = [0.18, 0.45, 0.9][iter - 1];
+        const rest = (1 - boost) / (size - 1);
+        probs = probs.map((p, i) => ({ label: p.label, value: i === matchKey ? boost : rest }));
+        buildBars(bars, probs);
+        await sleep(700);
+      }
+
+      terminal.textContent += '\nMidiendo el registro...\n';
+      terminal.textContent += `Resultado más probable: clave ${matchKey}.\n`;
+      terminal.textContent += `Texto resultante: ${target}.\n`;
+      result.innerHTML = `<b>Modo cuántico finalizado.</b><br>Clave más probable tras 3 iteraciones del oráculo: <b>${matchKey}</b><br>Texto descifrado: <b>${target}</b><br><br>Con una búsqueda clásica, en el peor caso habría que recorrer <b>${size} claves</b>. Aquí lo simulamos con <b>3 iteraciones</b> de preparación, marcado y amplificación.`;
+    }
+
+    function parseNumberList(text) {
+      return text
+        .split(/[\s,;]+/)
+        .map(t => t.trim())
+        .filter(Boolean)
+        .map(Number)
+        .filter(n => !Number.isNaN(n));
+    }
+
+    function renderMinList(nums, activeIndex = -1, winnerIndex = -1) {
+      const box = document.getElementById('minListVisual');
+      box.innerHTML = '';
+      nums.forEach((n, i) => {
+        const div = document.createElement('div');
+        div.className = 'num-chip' + (i === activeIndex ? ' active' : '') + (i === winnerIndex ? ' winner' : '');
+        div.innerHTML = `<div class="tiny muted">pos ${i}</div><div style="font-size:22px;font-weight:700;">${n}</div>`;
+        box.appendChild(div);
+      });
+    }
+
+    async function runMinClassic(list) {
+      openWindow('minimoWindow');
+      const terminal = document.getElementById('minTerminal');
+      const result = document.getElementById('minResult');
+      const bars = document.getElementById('minBars');
+      if (!list.length) return;
+
+      terminal.textContent = 'Inicializando búsqueda clásica del mínimo...\n';
+      let min = list[0];
+      let minIndex = 0;
+      renderMinList(list, 0, 0);
+      buildBars(bars, list.map((n, i) => ({ label: 'p=' + i, value: i === 0 ? 0.8 : 0.1 })), v => (v * 100).toFixed(0) + '%');
+      terminal.textContent += `Mínimo actual: ${min} en posición 0.\n`;
+      await sleep(300);
+
+      for (let i = 1; i < list.length; i++) {
+        renderMinList(list, i, minIndex);
+        terminal.textContent += `Comparando ${list[i]} con el mínimo actual ${min}...\n`;
+        buildBars(bars, list.map((n, idx) => ({ label: 'p=' + idx, value: idx === i ? 0.8 : idx === minIndex ? 0.6 : 0.08 })), v => (v * 100).toFixed(0) + '%');
+        if (list[i] < min) {
+          min = list[i];
+          minIndex = i;
+          terminal.textContent += `Nuevo mínimo encontrado: ${min} en posición ${i}.\n`;
+        }
+        await sleep(350);
+      }
+
+      renderMinList(list, -1, minIndex);
+      buildBars(bars, list.map((n, idx) => ({ label: 'p=' + idx, value: idx === minIndex ? 1 : 0.03 })), v => (v * 100).toFixed(0) + '%');
+      result.innerHTML = `<b>Modo clásico finalizado.</b><br>Valor mínimo: <b>${min}</b><br>Posición: <b>${minIndex}</b>`;
+    }
+
+    async function runMinQuantum(list) {
+      openWindow('minimoWindow');
+      const terminal = document.getElementById('minTerminal');
+      const result = document.getElementById('minResult');
+      const bars = document.getElementById('minBars');
+      if (!list.length) return;
+      const min = Math.min(...list);
+      const minIndex = list.indexOf(min);
+
+      terminal.textContent = 'Inicializando búsqueda cuántica simulada del mínimo...\n';
+      terminal.textContent += 'Aplicando Hadamard sobre el registro de posiciones...\n';
+      renderMinList(list);
+      let probs = list.map((_, i) => ({ label: 'p=' + i, value: 1 / list.length }));
+      buildBars(bars, probs);
+      await sleep(500);
+
+      terminal.textContent += 'Definiendo oráculo comparador: marcar números menores que el umbral actual.\n';
+      let thresholds = [Math.max(...list), Math.round((Math.max(...list) + min) / 2), min + 1];
+
+      for (let iter = 1; iter <= 3; iter++) {
+        const threshold = thresholds[Math.min(iter - 1, thresholds.length - 1)];
+        terminal.textContent += `\nIteración ${iter}: umbral = ${threshold}.\n`;
+        terminal.textContent += 'El oráculo compara cada posición con el umbral y favorece los mejores candidatos.\n';
+        renderMinList(list, -1, minIndex);
+
+        let favored = list.map((n, i) => (n <= threshold ? i : -1)).filter(i => i >= 0);
+        let favoredHasMin = favored.includes(minIndex);
+        const winnerBoost = [0.22, 0.58, 0.9][iter - 1];
+        const remaining = 1 - winnerBoost;
+        const others = list.length - 1;
+        probs = list.map((_, i) => ({
+          label: 'p=' + i,
+          value: i === minIndex ? winnerBoost : remaining / others
+        }));
+        buildBars(bars, probs);
+        terminal.textContent += favoredHasMin
+          ? `La posición ${minIndex} sigue ganando amplitud porque contiene el menor valor (${min}).\n`
+          : 'El menor aún no domina completamente, pero permanece entre los candidatos favorecidos.\n';
+        await sleep(700);
+      }
+
+      terminal.textContent += '\nMidiendo el registro de posiciones...\n';
+      terminal.textContent += `Resultado más probable: posición ${minIndex}, valor ${min}.\n`;
+      renderMinList(list, -1, minIndex);
+      result.innerHTML = `<b>Modo cuántico finalizado.</b><br>Valor mínimo más probable: <b>${min}</b><br>Posición: <b>${minIndex}</b><br><br>Visualmente, la app simula preparación de todas las posiciones, oráculo comparador y amplificación progresiva del menor valor.`;
+    }
+
+    document.getElementById('runCesarClassic').addEventListener('click', () => {
+      runCesarClassic(
+        document.getElementById('cesarInput').value.trim(),
+        document.getElementById('cesarTarget').value.trim().toUpperCase(),
+        document.getElementById('cesarAlphabet').value.trim().toUpperCase()
+      );
+    });
+
+    document.getElementById('runCesarQuantum').addEventListener('click', () => {
+      runCesarQuantum(
+        document.getElementById('cesarInput').value.trim(),
+        document.getElementById('cesarTarget').value.trim().toUpperCase(),
+        document.getElementById('cesarAlphabet').value.trim().toUpperCase()
+      );
+    });
+
+    document.getElementById('runMinClassic').addEventListener('click', () => {
+      runMinClassic(parseNumberList(document.getElementById('minInput').value));
+    });
+
+    document.getElementById('runMinQuantum').addEventListener('click', () => {
+      runMinQuantum(parseNumberList(document.getElementById('minInput').value));
+    });
+
+    document.getElementById('cesarExample').addEventListener('change', (event) => {
+      applyCesarExample(Number(event.target.value));
+    });
+
+    document.getElementById('minExample').addEventListener('change', (event) => {
+      applyMinExample(Number(event.target.value));
+    });
+
+    function logConsole(msg) {
+      const out = document.getElementById('consoleOutput');
+      out.textContent += '\n' + msg;
+      out.scrollTop = out.scrollHeight;
+    }
+
+    document.getElementById('runCommand').addEventListener('click', async () => {
+      const cmd = document.getElementById('consoleInput').value.trim();
+      logConsole('> ' + cmd);
+      const lower = cmd.toLowerCase();
+      if (lower.startsWith('open cesar')) {
+        openWindow('cesarWindow');
+        logConsole('Ventana Romper César abierta.');
+        return;
+      }
+      if (lower.startsWith('open minimo')) {
+        openWindow('minimoWindow');
+        logConsole('Ventana Buscar mínimo abierta.');
+        return;
+      }
+      if (lower.startsWith('run cesar')) {
+        const textMatch = cmd.match(/--texto\s+([^\n]+)/i);
+        const text = textMatch ? textMatch[1].trim() : 'KHOOR';
+        document.getElementById('cesarInput').value = text;
+        openWindow('cesarWindow');
+        logConsole('Lanzando simulación cuántica de César...');
+        await runCesarQuantum(text, document.getElementById('cesarTarget').value.trim().toUpperCase(), document.getElementById('cesarAlphabet').value.trim().toUpperCase());
+        logConsole('Tarea finalizada.');
+        return;
+      }
+      if (lower.startsWith('run minimo')) {
+        const listMatch = cmd.match(/--lista\s+([^\n]+)/i);
+        const listStr = listMatch ? listMatch[1].trim() : '15,3,22,9,1,18';
+        document.getElementById('minInput').value = listStr;
+        openWindow('minimoWindow');
+        logConsole('Lanzando simulación cuántica de mínimo...');
+        await runMinQuantum(parseNumberList(listStr));
+        logConsole('Tarea finalizada.');
+        return;
+      }
+      logConsole('Comando no reconocido.');
+    });
+
+    // Estado inicial visual
+    populateExampleSelect('cesarExample', CESAR_EXAMPLES);
+    populateExampleSelect('minExample', MIN_EXAMPLES);
+    applyCesarExample(0);
+    applyMinExample(0);
+  </script>
+</body>
+</html>

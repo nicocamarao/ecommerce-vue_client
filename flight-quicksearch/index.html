@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vuelo Express</title>
+    <style>
+      :root {
+        --bg: #f4efe7;
+        --bg-accent: #e6dccf;
+        --panel: rgba(255, 252, 247, 0.88);
+        --panel-strong: #fffaf3;
+        --ink: #1f2a2a;
+        --muted: #5b6767;
+        --line: rgba(31, 42, 42, 0.12);
+        --brand: #0d9488;
+        --brand-strong: #0f766e;
+        --brand-soft: rgba(13, 148, 136, 0.12);
+        --warning: #b45309;
+        --shadow: 0 18px 60px rgba(52, 46, 38, 0.14);
+        --radius: 24px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family: "Avenir Next", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at top left, rgba(13, 148, 136, 0.18), transparent 28%),
+          radial-gradient(circle at bottom right, rgba(180, 83, 9, 0.14), transparent 26%),
+          linear-gradient(180deg, var(--bg) 0%, #f8f5ef 45%, #f2ede6 100%);
+      }
+
+      body {
+        padding: 32px 18px 48px;
+      }
+
+      .shell {
+        max-width: 1180px;
+        margin: 0 auto;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.8fr);
+        gap: 22px;
+        align-items: stretch;
+      }
+
+      .hero-card,
+      .tips,
+      .result-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow);
+        border-radius: var(--radius);
+      }
+
+      .hero-card {
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-card::after {
+        content: "";
+        position: absolute;
+        inset: auto -80px -100px auto;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(13, 148, 136, 0.18), transparent 70%);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+        font-size: 0.86rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 18px 0 10px;
+        font-size: clamp(2.5rem, 5vw, 4.6rem);
+        line-height: 0.96;
+        letter-spacing: -0.05em;
+      }
+
+      .sub {
+        max-width: 52ch;
+        margin: 0 0 26px;
+        color: var(--muted);
+        font-size: 1.02rem;
+        line-height: 1.6;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      label {
+        display: block;
+        font-size: 0.84rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--muted);
+        letter-spacing: 0.01em;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+      }
+
+      input,
+      select,
+      button {
+        font: inherit;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 14px 15px;
+        border-radius: 16px;
+        border: 1px solid rgba(31, 42, 42, 0.12);
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--ink);
+        transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: rgba(13, 148, 136, 0.42);
+        box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
+        transform: translateY(-1px);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .primary {
+        border: 0;
+        border-radius: 16px;
+        padding: 14px 20px;
+        background: linear-gradient(135deg, var(--brand) 0%, var(--brand-strong) 100%);
+        color: white;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 16px 30px rgba(13, 148, 136, 0.24);
+      }
+
+      .ghost {
+        border: 1px solid rgba(31, 42, 42, 0.12);
+        border-radius: 16px;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.76);
+        color: var(--ink);
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .tips {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 18px;
+      }
+
+      .tips h2,
+      .results h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        letter-spacing: -0.03em;
+      }
+
+      .tip-list {
+        display: grid;
+        gap: 12px;
+      }
+
+      .tip {
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: var(--panel-strong);
+        border: 1px solid var(--line);
+      }
+
+      .tip strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .tip p,
+      .summary p,
+      .hint,
+      .meta,
+      .empty p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .summary {
+        margin-top: 24px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        border: 1px solid rgba(31, 42, 42, 0.1);
+        background: rgba(255, 250, 243, 0.8);
+      }
+
+      .summary strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .error {
+        margin-top: 14px;
+        min-height: 24px;
+        color: var(--warning);
+        font-weight: 700;
+      }
+
+      .results {
+        margin-top: 26px;
+      }
+
+      .results-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .result-card {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .result-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .result-head h3 {
+        margin: 0 0 6px;
+        font-size: 1.12rem;
+        letter-spacing: -0.03em;
+      }
+
+      .badge {
+        align-self: flex-start;
+        border-radius: 999px;
+        padding: 8px 12px;
+        background: var(--brand-soft);
+        color: var(--brand-strong);
+        font-size: 0.78rem;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .pill {
+        padding: 8px 11px;
+        border-radius: 999px;
+        background: rgba(31, 42, 42, 0.06);
+        font-size: 0.84rem;
+        color: var(--ink);
+      }
+
+      .providers {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .provider {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 140px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 800;
+        color: var(--ink);
+        background: white;
+        border: 1px solid rgba(31, 42, 42, 0.12);
+      }
+
+      .provider.skyscanner {
+        background: #e8f1ff;
+      }
+
+      .provider.booking {
+        background: #eef4ff;
+      }
+
+      .provider.google {
+        background: #fff3df;
+      }
+
+      .empty {
+        padding: 28px;
+        text-align: center;
+        border-radius: var(--radius);
+        background: rgba(255, 252, 247, 0.62);
+        border: 1px dashed rgba(31, 42, 42, 0.16);
+      }
+
+      .footnote {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .results-grid,
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 18px 12px 28px;
+        }
+
+        .hero-card,
+        .tips,
+        .result-card {
+          border-radius: 20px;
+        }
+
+        .hero-card,
+        .tips {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 2.3rem;
+        }
+
+        .result-head {
+          flex-direction: column;
+        }
+
+        .results-top {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <section class="hero">
+        <article class="hero-card">
+          <span class="eyebrow">Meta-buscador express</span>
+          <h1>Buscá vuelos rápido sin pelearte con pestañas.</h1>
+          <p class="sub">
+            Cargás origen, destino, ida y vuelta. La página te arma varias búsquedas útiles
+            y abre Skyscanner, Booking o Google Flights desde un solo lugar.
+          </p>
+
+          <form id="search-form">
+            <div class="form-grid">
+              <div class="field">
+                <label for="origin">Origen</label>
+                <input
+                  id="origin"
+                  name="origin"
+                  list="airport-list"
+                  autocomplete="off"
+                  placeholder="EZE o Madrid-Barajas (MAD)"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="destination">Destino</label>
+                <input
+                  id="destination"
+                  name="destination"
+                  list="airport-list"
+                  autocomplete="off"
+                  placeholder="BCN o Barcelona-El Prat (BCN)"
+                  required
+                />
+              </div>
+
+              <div class="field">
+                <label for="depart-date">Ida</label>
+                <input id="depart-date" name="depart-date" type="date" required />
+              </div>
+
+              <div class="field">
+                <label for="return-date">Vuelta</label>
+                <input id="return-date" name="return-date" type="date" required />
+              </div>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit">Generar opciones</button>
+              <button class="ghost" id="swap-button" type="button">Invertir ruta</button>
+            </div>
+            <div class="error" id="error-box" aria-live="polite"></div>
+          </form>
+
+          <div class="summary" id="trip-summary">
+            <strong>Cómo usarlo</strong>
+            <p>
+              Escribí código IATA o elegí una opción sugerida. Las tarjetas no muestran
+              tarifas live: disparan búsquedas rápidas ya armadas en proveedores reales.
+            </p>
+          </div>
+        </article>
+
+        <aside class="tips">
+          <div>
+            <h2>Qué hace bien</h2>
+            <div class="tip-list">
+              <div class="tip">
+                <strong>Skyscanner con link oficial</strong>
+                <p>Usa el formato documentado de referral para abrir resultados por fecha.</p>
+              </div>
+              <div class="tip">
+                <strong>Booking con búsqueda directa</strong>
+                <p>Arma una URL de resultados para round-trip sobre el dominio de vuelos.</p>
+              </div>
+              <div class="tip">
+                <strong>Google Flights como atajo de ruta</strong>
+                <p>Abre la vista de ruta. Google no publica un deep-link simple y estable con fechas.</p>
+              </div>
+            </div>
+          </div>
+
+          <p class="hint">
+            Tip: usá aeropuertos grandes si querés abrir más resultados rápido. Ejemplo:
+            `EZE`, `MAD`, `BCN`, `MIA`, `JFK`, `LHR`.
+          </p>
+        </aside>
+      </section>
+
+      <section class="results">
+        <div class="results-top">
+          <div>
+            <h2>Posibilidades rápidas</h2>
+            <p class="meta">Variantes útiles sobre tu misma búsqueda para ahorrar clicks.</p>
+          </div>
+        </div>
+
+        <div class="results-grid" id="results-grid">
+          <div class="empty">
+            <p>Cargá un viaje y te preparo varias combinaciones para abrir en los buscadores.</p>
+          </div>
+        </div>
+
+        <p class="footnote">
+          Nota: para resultados live de precios dentro del HTML haría falta backend y acceso
+          permitido a APIs o scraping controlado. Esta versión evita romper TOS y sigue siendo
+          útil para búsqueda rápida.
+        </p>
+      </section>
+    </div>
+
+    <datalist id="airport-list"></datalist>
+
+    <script>
+      const AIRPORTS = [
+        { code: "AEP", city: "Buenos Aires", name: "Aeroparque Jorge Newbery", country: "Argentina" },
+        { code: "ATL", city: "Atlanta", name: "Hartsfield-Jackson", country: "Estados Unidos" },
+        { code: "BCN", city: "Barcelona", name: "El Prat", country: "España" },
+        { code: "BER", city: "Berlin", name: "Brandenburg", country: "Alemania" },
+        { code: "BOG", city: "Bogota", name: "El Dorado", country: "Colombia" },
+        { code: "BOS", city: "Boston", name: "Logan", country: "Estados Unidos" },
+        { code: "CDG", city: "Paris", name: "Charles de Gaulle", country: "Francia" },
+        { code: "CUN", city: "Cancun", name: "Aeropuerto Internacional de Cancun", country: "Mexico" },
+        { code: "DFW", city: "Dallas", name: "Fort Worth", country: "Estados Unidos" },
+        { code: "DOH", city: "Doha", name: "Hamad", country: "Qatar" },
+        { code: "DUB", city: "Dublin", name: "Aeropuerto de Dublin", country: "Irlanda" },
+        { code: "DXB", city: "Dubai", name: "Dubai International", country: "Emiratos Arabes Unidos" },
+        { code: "EZE", city: "Buenos Aires", name: "Ministro Pistarini", country: "Argentina" },
+        { code: "FCO", city: "Rome", name: "Fiumicino", country: "Italia" },
+        { code: "FLL", city: "Fort Lauderdale", name: "Hollywood International", country: "Estados Unidos" },
+        { code: "GRU", city: "Sao Paulo", name: "Guarulhos", country: "Brasil" },
+        { code: "GIG", city: "Rio de Janeiro", name: "Galeao", country: "Brasil" },
+        { code: "HAV", city: "Havana", name: "Jose Marti", country: "Cuba" },
+        { code: "HND", city: "Tokyo", name: "Haneda", country: "Japon" },
+        { code: "IAD", city: "Washington", name: "Dulles", country: "Estados Unidos" },
+        { code: "IAH", city: "Houston", name: "George Bush Intercontinental", country: "Estados Unidos" },
+        { code: "IST", city: "Istanbul", name: "Istanbul Airport", country: "Turquia" },
+        { code: "JFK", city: "New York", name: "John F. Kennedy", country: "Estados Unidos" },
+        { code: "LAS", city: "Las Vegas", name: "Harry Reid", country: "Estados Unidos" },
+        { code: "LAX", city: "Los Angeles", name: "Los Angeles International", country: "Estados Unidos" },
+        { code: "LGA", city: "New York", name: "LaGuardia", country: "Estados Unidos" },
+        { code: "LHR", city: "London", name: "Heathrow", country: "Reino Unido" },
+        { code: "LIM", city: "Lima", name: "Jorge Chavez", country: "Peru" },
+        { code: "LIS", city: "Lisbon", name: "Humberto Delgado", country: "Portugal" },
+        { code: "MAD", city: "Madrid", name: "Adolfo Suarez Madrid-Barajas", country: "España" },
+        { code: "MCO", city: "Orlando", name: "Orlando International", country: "Estados Unidos" },
+        { code: "MDE", city: "Medellin", name: "Jose Maria Cordova", country: "Colombia" },
+        { code: "MEX", city: "Mexico City", name: "Aeropuerto Internacional Benito Juarez", country: "Mexico" },
+        { code: "MIA", city: "Miami", name: "Miami International", country: "Estados Unidos" },
+        { code: "MUC", city: "Munich", name: "Franz Josef Strauss", country: "Alemania" },
+        { code: "NRT", city: "Tokyo", name: "Narita", country: "Japon" },
+        { code: "ORD", city: "Chicago", name: "O'Hare", country: "Estados Unidos" },
+        { code: "ORY", city: "Paris", name: "Orly", country: "Francia" },
+        { code: "PHL", city: "Philadelphia", name: "Philadelphia International", country: "Estados Unidos" },
+        { code: "PUJ", city: "Punta Cana", name: "Punta Cana International", country: "Republica Dominicana" },
+        { code: "PTY", city: "Panama City", name: "Tocumen", country: "Panama" },
+        { code: "SCL", city: "Santiago", name: "Arturo Merino Benitez", country: "Chile" },
+        { code: "SEA", city: "Seattle", name: "Seattle-Tacoma", country: "Estados Unidos" },
+        { code: "SFO", city: "San Francisco", name: "San Francisco International", country: "Estados Unidos" },
+        { code: "SYD", city: "Sydney", name: "Kingsford Smith", country: "Australia" },
+        { code: "UIO", city: "Quito", name: "Mariscal Sucre", country: "Ecuador" },
+        { code: "VCP", city: "Sao Paulo", name: "Viracopos", country: "Brasil" },
+        { code: "VIE", city: "Vienna", name: "Vienna International", country: "Austria" },
+        { code: "YUL", city: "Montreal", name: "Pierre Elliott Trudeau", country: "Canada" },
+        { code: "YYZ", city: "Toronto", name: "Toronto Pearson", country: "Canada" }
+      ];
+
+      const airportIndex = AIRPORTS.reduce((acc, airport) => {
+        acc[airport.code] = airport;
+        return acc;
+      }, {});
+
+      const airportList = document.getElementById("airport-list");
+      const form = document.getElementById("search-form");
+      const resultsGrid = document.getElementById("results-grid");
+      const errorBox = document.getElementById("error-box");
+      const summary = document.getElementById("trip-summary");
+      const originInput = document.getElementById("origin");
+      const destinationInput = document.getElementById("destination");
+      const departInput = document.getElementById("depart-date");
+      const returnInput = document.getElementById("return-date");
+      const swapButton = document.getElementById("swap-button");
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todayValue = formatDate(today);
+      departInput.min = todayValue;
+      returnInput.min = todayValue;
+
+      seedAirportList();
+      seedDates();
+      hydrateFromQuery();
+      maybeBuildInitialResults();
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        buildSearches();
+      });
+
+      swapButton.addEventListener("click", () => {
+        const currentOrigin = originInput.value;
+        originInput.value = destinationInput.value;
+        destinationInput.value = currentOrigin;
+      });
+
+      departInput.addEventListener("change", () => {
+        if (returnInput.value && returnInput.value < departInput.value) {
+          returnInput.value = addDays(departInput.value, 6);
+        }
+
+        returnInput.min = departInput.value || todayValue;
+      });
+
+      function seedAirportList() {
+        airportList.innerHTML = AIRPORTS.map((airport) => {
+          const label = `${airport.code} - ${airport.city}, ${airport.name} (${airport.country})`;
+          return `<option value="${label}"></option>`;
+        }).join("");
+      }
+
+      function seedDates() {
+        if (!departInput.value) {
+          departInput.value = addDays(todayValue, 30);
+        }
+
+        if (!returnInput.value) {
+          returnInput.value = addDays(departInput.value, 7);
+        }
+
+        returnInput.min = departInput.value;
+      }
+
+      function hydrateFromQuery() {
+        const params = new URLSearchParams(window.location.search);
+        originInput.value = params.get("from") || originInput.value;
+        destinationInput.value = params.get("to") || destinationInput.value;
+        departInput.value = params.get("depart") || departInput.value;
+        returnInput.value = params.get("return") || returnInput.value;
+        returnInput.min = departInput.value || todayValue;
+      }
+
+      function maybeBuildInitialResults() {
+        if (originInput.value && destinationInput.value && departInput.value && returnInput.value) {
+          buildSearches();
+        }
+      }
+
+      function buildSearches() {
+        errorBox.textContent = "";
+
+        const origin = parseAirport(originInput.value);
+        const destination = parseAirport(destinationInput.value);
+        const depart = departInput.value;
+        const inbound = returnInput.value;
+
+        if (!origin || !destination) {
+          errorBox.textContent = "Usá códigos IATA o elegí una opción del listado.";
+          return;
+        }
+
+        if (origin.code === destination.code) {
+          errorBox.textContent = "Origen y destino no pueden ser el mismo aeropuerto.";
+          return;
+        }
+
+        if (!depart || !inbound) {
+          errorBox.textContent = "Completá ida y vuelta.";
+          return;
+        }
+
+        if (inbound < depart) {
+          errorBox.textContent = "La fecha de vuelta no puede ser anterior a la ida.";
+          return;
+        }
+
+        const params = new URLSearchParams({
+          from: originInput.value,
+          to: destinationInput.value,
+          depart,
+          return: inbound
+        });
+        window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
+
+        const variants = uniqueByLabel([
+          createVariant("Exacta", "Tu búsqueda tal cual.", origin, destination, depart, inbound, "Ruta base"),
+          createVariant(
+            "Salida un día antes",
+            "Sirve para pescar diferencias de precio sin cambiar mucho el viaje.",
+            origin,
+            destination,
+            clampDepart(addDays(depart, -1), todayValue),
+            shiftReturn(inbound, depart, -1),
+            "Flexible ida"
+          ),
+          createVariant(
+            "Vuelta un día después",
+            "Útil cuando la tarifa baja al mover el regreso.",
+            origin,
+            destination,
+            depart,
+            addDays(inbound, 1),
+            "Flexible vuelta"
+          ),
+          createVariant(
+            "Mover todo +1 día",
+            "Te deja comparar una ventana completa sin reescribir datos.",
+            origin,
+            destination,
+            addDays(depart, 1),
+            addDays(inbound, 1),
+            "Ventana alternativa"
+          )
+        ]).filter((variant) => variant.inbound >= variant.depart);
+
+        renderSummary(origin, destination, depart, inbound);
+        renderResults(variants);
+      }
+
+      function renderSummary(origin, destination, depart, inbound) {
+        const days = dateDiff(depart, inbound);
+        summary.innerHTML = `
+          <strong>${origin.city} (${origin.code}) → ${destination.city} (${destination.code})</strong>
+          <p>
+            Ida ${humanDate(depart)}. Vuelta ${humanDate(inbound)}.
+            Viaje de ${days} ${days === 1 ? "día" : "días"}.
+          </p>
+        `;
+      }
+
+      function renderResults(variants) {
+        resultsGrid.innerHTML = variants
+          .map((variant) => {
+            const stay = dateDiff(variant.depart, variant.inbound);
+            return `
+              <article class="result-card">
+                <div class="result-head">
+                  <div>
+                    <h3>${variant.title}</h3>
+                    <p class="meta">${variant.description}</p>
+                  </div>
+                  <span class="badge">${variant.badge}</span>
+                </div>
+
+                <div class="pill-row">
+                  <span class="pill">${variant.origin.code} → ${variant.destination.code}</span>
+                  <span class="pill">Ida ${humanDate(variant.depart)}</span>
+                  <span class="pill">Vuelta ${humanDate(variant.inbound)}</span>
+                  <span class="pill">${stay} ${stay === 1 ? "día" : "días"} de viaje</span>
+                </div>
+
+                <div class="providers">
+                  <a class="provider skyscanner" href="${buildSkyscannerUrl(variant)}" target="_blank" rel="noreferrer">Abrir Skyscanner</a>
+                  <a class="provider booking" href="${buildBookingUrl(variant)}" target="_blank" rel="noreferrer">Abrir Booking</a>
+                  <a class="provider google" href="${buildGoogleUrl(variant)}" target="_blank" rel="noreferrer">Abrir Google Flights</a>
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      function parseAirport(rawValue) {
+        if (!rawValue) {
+          return null;
+        }
+
+        const value = rawValue.trim();
+        const codeMatch = value.toUpperCase().match(/\b([A-Z]{3})\b/);
+        const code = codeMatch ? codeMatch[1] : null;
+
+        if (code && airportIndex[code]) {
+          return airportIndex[code];
+        }
+
+        if (code) {
+          return {
+            code,
+            city: code,
+            name: code,
+            country: "N/D"
+          };
+        }
+
+        const normalized = normalize(value);
+        const airport = AIRPORTS.find((item) => {
+          const haystack = normalize(`${item.code} ${item.city} ${item.name} ${item.country}`);
+          return haystack.includes(normalized);
+        });
+
+        return airport || null;
+      }
+
+      function createVariant(title, description, origin, destination, depart, inbound, badge) {
+        return { title, description, origin, destination, depart, inbound, badge };
+      }
+
+      function uniqueByLabel(items) {
+        const seen = new Set();
+        return items.filter((item) => {
+          const key = `${item.origin.code}-${item.destination.code}-${item.depart}-${item.inbound}`;
+          if (seen.has(key)) {
+            return false;
+          }
+
+          seen.add(key);
+          return true;
+        });
+      }
+
+      function clampDepart(candidate, minValue) {
+        return candidate < minValue ? minValue : candidate;
+      }
+
+      function shiftReturn(inbound, originalDepart, delta) {
+        const shifted = addDays(inbound, delta);
+        return shifted < originalDepart ? originalDepart : shifted;
+      }
+
+      function buildSkyscannerUrl(variant) {
+        const params = new URLSearchParams({
+          origin: variant.origin.code.toLowerCase(),
+          destination: variant.destination.code.toLowerCase(),
+          outboundDate: variant.depart,
+          inboundDate: variant.inbound
+        });
+
+        return `https://skyscanner.net/g/referrals/v1/flights/day-view/?${params.toString()}`;
+      }
+
+      function buildBookingUrl(variant) {
+        const from = variant.origin.code.toUpperCase();
+        const to = variant.destination.code.toUpperCase();
+        const params = new URLSearchParams({
+          type: "ROUNDTRIP",
+          adults: "1",
+          cabinClass: "ECONOMY",
+          sort: "BEST",
+          depart: variant.depart,
+          return: variant.inbound,
+          from,
+          to
+        });
+
+        return `https://flights.booking.com/flights/${from}-${to}/?${params.toString()}`;
+      }
+
+      function buildGoogleUrl(variant) {
+        const originSlug = slugify(variant.origin.city);
+        const destinationSlug = slugify(variant.destination.city);
+        const routeUrl = `https://www.google.com/travel/flights/flights-from-${originSlug}-to-${destinationSlug}.html`;
+        const params = new URLSearchParams({
+          hl: "es-419",
+          curr: "USD"
+        });
+
+        return `${routeUrl}?${params.toString()}`;
+      }
+
+      function dateDiff(start, end) {
+        const startDate = new Date(`${start}T00:00:00`);
+        const endDate = new Date(`${end}T00:00:00`);
+        const diff = Math.round((endDate - startDate) / 86400000);
+        return Math.max(diff, 0);
+      }
+
+      function addDays(dateString, days) {
+        const date = new Date(`${dateString}T00:00:00`);
+        date.setDate(date.getDate() + days);
+        return formatDate(date);
+      }
+
+      function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function humanDate(value) {
+        return new Intl.DateTimeFormat("es-AR", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric"
+        }).format(new Date(`${value}T00:00:00`));
+      }
+
+      function normalize(value) {
+        return value
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+      }
+
+      function slugify(value) {
+        return normalize(value)
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+    </script>
+  </body>
+</html>
